@@ -25,9 +25,8 @@ public class UserDao {
 	}
 	
 	public UserEntity exist(UserEntity user){
-		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username and u.password = :password", UserEntity.class);
+		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username", UserEntity.class);
 		q.setParameter("username", user.getUsername());
-		q.setParameter("password", user.getPassword());
 		List<UserEntity> results = q.getResultList();
 		if (results.size()==1){
 			return results.get(0);

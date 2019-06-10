@@ -46,6 +46,7 @@ public class AuthManager {
 			newUser.setSuccess(true);
 		}
 		request.getSession().setAttribute("token", user.getToken());
+		request.getSession().setAttribute("token", user.getId());
 		return newUser;
 	}
 	
@@ -54,11 +55,15 @@ public class AuthManager {
 		ActionResult<UserEntity> newUser = new ActionResult<UserEntity>(); 
 		newUser.setData(dao.exist(user));
 		if (newUser.getData() == null){
-			newUser.setMessage("کاربر وجود ندارد");
-		}else{
+			newUser.setMessage("نام کاربری وجود ندارد");
+		}else if (newUser.getData().getPassword().equals(user.getPassword())){
 			newUser.setSuccess(true);
 			newUser.getData().setToken(tg.generateToken(user.getUsername()));
 			request.getSession().setAttribute("token", newUser.getData().getToken());
+			request.getSession().setAttribute("user_id", newUser.getData().getId());
+		}
+		else{
+			newUser.setMessage("رمز عبور اشتباه وارد شده است");
 		}
 		return newUser;
 	}
@@ -67,6 +72,7 @@ public class AuthManager {
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
 		if (request.getSession().getAttribute("token").equals(user.getToken())){
 			request.getSession().setAttribute("token", "");
+			request.getSession().setAttribute("user_id", "");
 			answer.setData(true);
 			answer.setSuccess(true);
 			answer.setMessage("با موفقتیت خارج شد");

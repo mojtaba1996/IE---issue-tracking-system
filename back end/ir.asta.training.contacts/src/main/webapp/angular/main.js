@@ -47,7 +47,7 @@ var AppRoutingModule = /** @class */ (function () {
     }
     AppRoutingModule = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgModule"])({
-            imports: [_angular_router__WEBPACK_IMPORTED_MODULE_2__["RouterModule"].forRoot(routes)],
+            imports: [_angular_router__WEBPACK_IMPORTED_MODULE_2__["RouterModule"].forRoot(routes, { useHash: true })],
             exports: [_angular_router__WEBPACK_IMPORTED_MODULE_2__["RouterModule"]]
         })
     ], AppRoutingModule);
@@ -110,7 +110,6 @@ var AppComponent = /** @class */ (function () {
         var _this = this;
         this.authService.logout().subscribe(function (answer) {
             if (answer.success) {
-                console.log('logout');
                 _this.authService.isLoggedIn = false;
                 _this.authService.role = "";
                 _this.authService.username = "";
@@ -151,7 +150,6 @@ var AppComponent = /** @class */ (function () {
     };
     AppComponent.prototype.change_menu = function () {
         var menu_div = document.getElementById('menu_div');
-        console.log(menu_div.className);
         if (menu_div.getAttribute('status') == 'open') {
             menu_div.setAttribute('status', 'close');
         }
@@ -324,9 +322,11 @@ var AuthGuard = /** @class */ (function () {
         if (!this.checkLogin(url)) {
             flag = false;
         }
+        console.log(flag);
         if (!this.checkAccessLevel(url)) {
             flag = false;
         }
+        console.log(flag);
         return flag;
     };
     AuthGuard.prototype.canActivateChild = function (next, state) {
@@ -336,7 +336,7 @@ var AuthGuard = /** @class */ (function () {
         return true;
     };
     AuthGuard.prototype.checkLogin = function (url) {
-        if (this.authService.isLoggedIn) {
+        if (localStorage.getItem('isLoggedIn')) {
             return true;
         }
         // Store the attempted URL for redirecting
@@ -498,6 +498,17 @@ var AuthService = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(AuthService.prototype, "redirectUrl", {
+        get: function () {
+            return this._redirectUrl;
+        },
+        set: function (value) {
+            console.log(value);
+            this._redirectUrl = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /*
       login(): Observable<boolean> {
         return of(true).pipe(
@@ -517,6 +528,12 @@ var AuthService = /** @class */ (function () {
             password: password,
         };
         return this.http.post(url, user, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(this.handleError('login')));
+    };
+    AuthService.prototype.login_successfull = function (user) {
+        localStorage.setItem('token', user.token);
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('role', user.role);
+        localStorage.setItem('username', user.username);
     };
     AuthService.prototype.logout = function () {
         var httpOptions = {
@@ -589,7 +606,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"login_form\" *ngIf=\"!authService.isLoggedIn\">\n  <h3 class=\"white_text\">ورود به سامانه</h3>\n  <form [formGroup]=login_form (ngSubmit) = \"login()\" class=\"rc\">\n      <label>\n          شماره کاربری:\n          <input type=\"text\" formControlName = \"username\">\n      </label>\n      <label>\n          رمز عبور:\n          <input type=\"password\" formControlName = \"password\" >\n      </label>\n      <button type=\"submit\" [disabled]=\"!login_form.valid\">ورود</button>\n  </form>\n  <div id = \"areYouSignedUp\">\n      <a routerLink = \"/signup\" class = 'login_link'>عضو نیستی؟</a>\n  </div>\n</div>"
+module.exports = "<div id=\"login_form\" *ngIf=\"!authService.isLoggedIn\">\n  <h3 class=\"white_text\">ورود به سامانه</h3>\n  <form [formGroup]=login_form (ngSubmit) = \"login()\" class=\"rc\">\n      <label>\n          شماره کاربری:\n          <input type=\"text\" formControlName = \"username\">\n      </label>\n      <label>\n          رمز عبور:\n          <input type=\"password\" formControlName = \"password\" >\n      </label>\n      <button type=\"submit\" [disabled]=\"!login_form.valid\">ورود</button>\n  </form>\n  <div *ngIf = \"login_error\" class = \"alert alert-danger\">\n    {{login_error_message}}\n  </div>\n  <div id = \"areYouSignedUp\">\n      <a routerLink = \"/signup\" class = 'login_link'>عضو نیستی؟</a>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -617,6 +634,8 @@ var LoginComponent = /** @class */ (function () {
     function LoginComponent(authService, router) {
         this.authService = authService;
         this.router = router;
+        this.login_error = false;
+        this.login_error_message = "";
         this.login_form = new _angular_forms__WEBPACK_IMPORTED_MODULE_4__["FormGroup"]({
             username: new _angular_forms__WEBPACK_IMPORTED_MODULE_4__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_4__["Validators"].required),
             password: new _angular_forms__WEBPACK_IMPORTED_MODULE_4__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_4__["Validators"].required),
@@ -628,18 +647,26 @@ var LoginComponent = /** @class */ (function () {
         var _this = this;
         var username_inserted = this.login_form.get('username').value;
         var password_inserted = this.login_form.get('password').value;
-        this.authService.login(username_inserted, password_inserted).subscribe(function (answer) {
-            console.log(answer.message);
-            if (answer.success) {
-                console.log('successful');
-                _this.authService.isLoggedIn = true;
-                _this.authService.role = answer.data.role;
-                _this.authService.username = answer.data.username;
-                _this.authService.token = answer.data.token;
-                var redirect = _this.authService.redirectUrl ? _this.router.parseUrl(_this.authService.redirectUrl) : '/student';
-                _this.router.navigateByUrl(redirect);
-            }
-        });
+        this.authService.login(username_inserted, password_inserted).subscribe(function (answer) { return _this.loginAnswer(answer); });
+    };
+    LoginComponent.prototype.loginAnswer = function (answer) {
+        if (answer.success) {
+            this.authService.login_successfull(answer.data);
+            /*
+            this.authService.isLoggedIn = true;
+            this.authService.role = answer.data.role;
+            this.authService.username = answer.data.username;
+            this.authService.token = answer.data.token;
+            */
+            console.log(this.authService.redirectUrl);
+            var redirect = this.authService.redirectUrl ? this.router.parseUrl(this.authService.redirectUrl) : '/student';
+            console.log(redirect.toString());
+            this.router.navigateByUrl(redirect);
+        }
+        else {
+            this.login_error = true;
+            this.login_error_message = answer.message;
+        }
     };
     LoginComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -776,11 +803,7 @@ var SignupComponent = /** @class */ (function () {
     };
     SignupComponent.prototype.result = function (ar) {
         if (ar.success) {
-            var user = ar.data;
-            this.authService.username = user.username;
-            this.authService.isLoggedIn = true;
-            this.authService.role = user.role;
-            this.authService.token = user.token;
+            this.authService.login_successfull(ar.data);
             var redirect = this.authService.redirectUrl ? this.router.parseUrl(this.authService.redirectUrl) : '/student';
             this.router.navigateByUrl(redirect);
         }
@@ -2340,7 +2363,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\mojtaba\Dropbox\term 10\مهندسی اینترنت\issue-tracking-system\src\main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\front end\src\main.ts */"./src/main.ts");
 
 
 /***/ })
