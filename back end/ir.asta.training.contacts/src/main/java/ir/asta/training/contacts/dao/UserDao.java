@@ -1,5 +1,7 @@
 package ir.asta.training.contacts.dao;
 
+
+
 import java.util.List;
 
 import javax.inject.Named;
@@ -9,6 +11,7 @@ import javax.persistence.Query;
 
 import ir.asta.training.contacts.entities.ContactEntity;
 import ir.asta.training.contacts.entities.UserEntity;
+import models.Roles;
 
 @Named("authDao")
 public class UserDao {
@@ -50,10 +53,19 @@ public class UserDao {
 		Query q = entityManager.createQuery("DELETE FROM UserEntity");
 		q.executeUpdate();
 	}
+	
+
 	public boolean isNewUsername(String username){
 		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username");
 		q.setParameter("username", username);
 		List<UserEntity> result = q.getResultList();
 		return result.size() == 0;
+	}
+
+	public List<UserEntity> getResponsibleUsers(){
+		Roles roles = new Roles();
+		Query q = entityManager.createQuery("select u.firstname, u.lastname, u.username, u.role from UserEntity u where u.role <> :role and u.confirmed = True");
+		q.setParameter("role", roles.STUDENT);
+		return q.getResultList();
 	}
 }

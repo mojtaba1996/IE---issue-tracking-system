@@ -76,7 +76,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc\">\n    <h2 class=\"white_text\">سامانه رسیدگی به انتقادات، پیشنهادات و شکایت‌ها</h2>\n    <div [ngClass]=\"authService.role\" id = \"menu_div\" *ngIf = \"authService.isLoggedIn\" status = 'close'>\n        <div class = \"three_lines\" (click) = \"change_menu()\">\n            <div></div>\n            <div></div>\n            <div></div>\n        </div>\n        <br>\n        <div id = 'profile'>\n            <a routerLink = '/student/edit-profile'>\n                <img src=\"profile.png\" alt=\"پروفایل\">\n            </a>\n        </div>\n        <nav class=\"menu\" status = 'close'>\n            <a routerLink=\"/manager\" routerLinkActive=\"active\" *ngIf = \"mayI('مدیر')\">بخش مدیریت</a>\n            <a routerLink=\"/teacher\" routerLinkActive=\"active\" *ngIf = \"mayI('استاد')\">بخش اساتید</a>\n            <a routerLink=\"/employee\" routerLinkActive=\"active\" *ngIf = \"mayI('کارمند')\">بخش کارمندان</a>\n            <a routerLink=\"/student\" routerLinkActive=\"active\" *ngIf = \"mayI('دانشجو')\">بخش دانشجویی</a>\n        </nav>\n        <button (click)=\"logout()\" *ngIf=\"authService.isLoggedIn\">خروج</button>\n    </div>\n    <div class=\"rc\" id = \"dashboard_div\">\n        <router-outlet></router-outlet>\n    </div>\n    \n</div>"
+module.exports = "<div class=\"rc\">\n    <h2 class=\"white_text\">سامانه رسیدگی به انتقادات، پیشنهادات و شکایت‌ها</h2>\n    <div [ngClass]=\"authService.role\" id = \"menu_div\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\" status = 'close'>\n        <div class = \"three_lines\" (click) = \"change_menu()\">\n            <div></div>\n            <div></div>\n            <div></div>\n        </div>\n        <br>\n        <div id = 'profile'>\n            <a routerLink = '/student/edit-profile'>\n                <img src=\"profile.png\" alt=\"پروفایل\">\n            </a>\n        </div>\n        <nav class=\"menu\" status = 'close'>\n            <a routerLink=\"/manager\" routerLinkActive=\"active\" *ngIf = \"mayI('مدیر')\">بخش مدیریت</a>\n            <a routerLink=\"/teacher\" routerLinkActive=\"active\" *ngIf = \"mayI('استاد')\">بخش اساتید</a>\n            <a routerLink=\"/employee\" routerLinkActive=\"active\" *ngIf = \"mayI('کارمند')\">بخش کارمندان</a>\n            <a routerLink=\"/student\" routerLinkActive=\"active\" *ngIf = \"mayI('دانشجو')\">بخش دانشجویی</a>\n        </nav>\n        <button (click)=\"logout()\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\">خروج</button>\n    </div>\n    <div class=\"rc\" id = \"dashboard_div\">\n        <router-outlet></router-outlet>\n    </div>\n    \n</div>"
 
 /***/ }),
 
@@ -110,20 +110,21 @@ var AppComponent = /** @class */ (function () {
         var _this = this;
         this.authService.logout().subscribe(function (answer) {
             if (answer.success) {
-                _this.authService.isLoggedIn = false;
-                _this.authService.role = "";
-                _this.authService.username = "";
-                _this.authService.token = "";
+                _this.authService.logout_successfully();
                 _this.authService.redirectUrl = "/login";
                 _this.router.navigateByUrl('/login');
+            }
+            else {
+                console.log(answer.message);
             }
         });
     };
     AppComponent.prototype.mayI = function (role) {
-        if (this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER) {
+        var userRole = localStorage.getItem('role');
+        if (userRole == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER) {
             return true;
         }
-        else if (this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER) {
+        else if (userRole == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER) {
             if (role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER) {
                 return false;
             }
@@ -131,7 +132,7 @@ var AppComponent = /** @class */ (function () {
                 return true;
             }
         }
-        else if (this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].EMPLOYEE) {
+        else if (userRole == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].EMPLOYEE) {
             if (role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER || role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER) {
                 return false;
             }
@@ -139,7 +140,7 @@ var AppComponent = /** @class */ (function () {
                 return true;
             }
         }
-        else if (this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].STUDENT) {
+        else if (userRole == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].STUDENT) {
             if (role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].STUDENT) {
                 return true;
             }
@@ -322,11 +323,9 @@ var AuthGuard = /** @class */ (function () {
         if (!this.checkLogin(url)) {
             flag = false;
         }
-        console.log(flag);
         if (!this.checkAccessLevel(url)) {
             flag = false;
         }
-        console.log(flag);
         return flag;
     };
     AuthGuard.prototype.canActivateChild = function (next, state) {
@@ -336,7 +335,7 @@ var AuthGuard = /** @class */ (function () {
         return true;
     };
     AuthGuard.prototype.checkLogin = function (url) {
-        if (localStorage.getItem('isLoggedIn')) {
+        if (localStorage.getItem('isLoggedIn') == 'true') {
             return true;
         }
         // Store the attempted URL for redirecting
@@ -347,13 +346,13 @@ var AuthGuard = /** @class */ (function () {
     };
     AuthGuard.prototype.checkAccessLevel = function (url) {
         if (url.includes('manager')) {
-            return this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER;
+            return localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER;
         }
         else if (url.includes('teacher')) {
-            return this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER || this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER;
+            return localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER || localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER;
         }
         else if (url.includes('employee')) {
-            return this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER || this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER || this.authService.role == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].EMPLOYEE;
+            return localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].MANAGER || localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].TEACHER || localStorage.getItem('role') == _models__WEBPACK_IMPORTED_MODULE_4__["Roles"].EMPLOYEE;
         }
         else {
             return true;
@@ -437,8 +436,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! rxjs */ "./node_modules/rxjs/_esm5/index.js");
 /* harmony import */ var _angular_common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/common/http */ "./node_modules/@angular/common/fesm5/http.js");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs/operators */ "./node_modules/rxjs/_esm5/operators/index.js");
-/* harmony import */ var _models__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../models */ "./src/app/models.ts");
-
 
 
 
@@ -449,73 +446,17 @@ var AuthService = /** @class */ (function () {
     function AuthService(userService, http) {
         this.userService = userService;
         this.http = http;
-        this.users = [
-            { id: 1, firstname: 'Mojtaba', lastname: 'Kariminia', username: '93213129', password: '1', role: _models__WEBPACK_IMPORTED_MODULE_6__["Roles"].STUDENT, confirmed: true },
-            { id: 2, firstname: 'Mohammad', lastname: 'Shadab', username: '93213088', password: '1', role: _models__WEBPACK_IMPORTED_MODULE_6__["Roles"].STUDENT, confirmed: true },
-            { id: 3, firstname: 'Sadegh', lastname: 'Aliakbari', username: '10000000', password: '1', role: _models__WEBPACK_IMPORTED_MODULE_6__["Roles"].TEACHER, confirmed: false },
-            { id: 4, firstname: 'Ali', lastname: 'Ghafori', username: '20000000', password: '1', role: _models__WEBPACK_IMPORTED_MODULE_6__["Roles"].EMPLOYEE, confirmed: true },
-            { id: 5, firstname: 'Mehrnoush', lastname: 'Shamsfard', username: '30000000', password: '1', role: _models__WEBPACK_IMPORTED_MODULE_6__["Roles"].MANAGER, confirmed: true },
-        ];
-        this._isLoggedIn = false;
     }
-    Object.defineProperty(AuthService.prototype, "isLoggedIn", {
-        get: function () {
-            return this._isLoggedIn;
-        },
-        set: function (value) {
-            this._isLoggedIn = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(AuthService.prototype, "role", {
-        get: function () {
-            return this._role;
-        },
-        set: function (value) {
-            this._role = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(AuthService.prototype, "username", {
-        get: function () {
-            return this._username;
-        },
-        set: function (value) {
-            this._username = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(AuthService.prototype, "token", {
-        get: function () {
-            return this._token;
-        },
-        set: function (value) {
-            this._token = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
     Object.defineProperty(AuthService.prototype, "redirectUrl", {
         get: function () {
             return this._redirectUrl;
         },
         set: function (value) {
-            console.log(value);
             this._redirectUrl = value;
         },
         enumerable: true,
         configurable: true
     });
-    /*
-      login(): Observable<boolean> {
-        return of(true).pipe(
-          delay(1000),
-          tap(val => this.isLoggedIn = true)
-        );
-      }*/
     AuthService.prototype.login = function (username, password) {
         var httpOptions = {
             headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_4__["HttpHeaders"]({
@@ -535,6 +476,12 @@ var AuthService = /** @class */ (function () {
         localStorage.setItem('role', user.role);
         localStorage.setItem('username', user.username);
     };
+    AuthService.prototype.logout_successfully = function () {
+        localStorage.setItem('token', undefined);
+        localStorage.setItem('isLoggedIn', undefined);
+        localStorage.setItem('role', undefined);
+        localStorage.setItem('username', undefined);
+    };
     AuthService.prototype.logout = function () {
         var httpOptions = {
             headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_4__["HttpHeaders"]({
@@ -543,7 +490,7 @@ var AuthService = /** @class */ (function () {
         };
         var url = "http://localhost:8080/contacts/rest/auth/logout";
         var user = {
-            token: this.token,
+            token: localStorage.getItem('token'),
         };
         return this.http.post(url, user, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(this.handleError('logout')));
     };
@@ -564,6 +511,9 @@ var AuthService = /** @class */ (function () {
         };
         var url = "http://localhost:8080/contacts/rest/auth/isnewusername/" + username;
         return this.http.get(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_5__["catchError"])(this.handleError("isnewusername")));
+    };
+    AuthService.prototype.readLocalStorageValue = function (key) {
+        return localStorage.getItem(key);
     };
     AuthService.prototype.handleError = function (operation, result) {
         if (operation === void 0) { operation = 'operation'; }
@@ -606,7 +556,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"login_form\" *ngIf=\"!authService.isLoggedIn\">\n  <h3 class=\"white_text\">ورود به سامانه</h3>\n  <form [formGroup]=login_form (ngSubmit) = \"login()\" class=\"rc\">\n      <label>\n          شماره کاربری:\n          <input type=\"text\" formControlName = \"username\">\n      </label>\n      <label>\n          رمز عبور:\n          <input type=\"password\" formControlName = \"password\" >\n      </label>\n      <button type=\"submit\" [disabled]=\"!login_form.valid\">ورود</button>\n  </form>\n  <div *ngIf = \"login_error\" class = \"alert alert-danger\">\n    {{login_error_message}}\n  </div>\n  <div id = \"areYouSignedUp\">\n      <a routerLink = \"/signup\" class = 'login_link'>عضو نیستی؟</a>\n  </div>\n</div>"
+module.exports = "<div id=\"login_form\" *ngIf=\"authService.readLocalStorageValue('isLoggedIn') != 'true'\">\n  <h3 class=\"white_text\">ورود به سامانه</h3>\n  <form [formGroup]=login_form (ngSubmit) = \"login()\" class=\"rc\">\n      <label>\n          شماره کاربری:\n          <input type=\"text\" formControlName = \"username\">\n      </label>\n      <label>\n          رمز عبور:\n          <input type=\"password\" formControlName = \"password\" >\n      </label>\n      <button type=\"submit\" [disabled]=\"!login_form.valid\">ورود</button>\n  </form>\n  <div *ngIf = \"login_error\" class = \"alert alert-danger\">\n    {{login_error_message}}\n  </div>\n  <div id = \"areYouSignedUp\">\n      <a routerLink = \"/signup\" class = 'login_link'>عضو نیستی؟</a>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -658,9 +608,7 @@ var LoginComponent = /** @class */ (function () {
             this.authService.username = answer.data.username;
             this.authService.token = answer.data.token;
             */
-            console.log(this.authService.redirectUrl);
             var redirect = this.authService.redirectUrl ? this.router.parseUrl(this.authService.redirectUrl) : '/student';
-            console.log(redirect.toString());
             this.router.navigateByUrl(redirect);
         }
         else {
@@ -2260,6 +2208,16 @@ var UserService = /** @class */ (function () {
         this.http = http;
         this.usersUrl = 'api/users'; // URL to web api
     }
+    /* used in post a new case */
+    UserService.prototype.getResponsibleUsers = function () {
+        var httpOptions = {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({
+                'Content-Type': 'application/json',
+            })
+        };
+        var url = "http://localhost:8080/contacts/rest/users/getResponsibleUsers/" + localStorage.getItem('token');
+        return this.http.get(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("getResponsibleUsers")));
+    };
     /** GET heroes from the server */
     UserService.prototype.getUsesrs = function () {
         return this.http.get(this.usersUrl)

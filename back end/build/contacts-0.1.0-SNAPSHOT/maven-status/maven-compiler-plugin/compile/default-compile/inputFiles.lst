@@ -7,12 +7,15 @@ C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\entities\UserEntity.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\wise\core\datamanagement\ActionResult.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\dao\ContactDao.java
+C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\services\impl\UserServiceImpl.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\services\impl\SampleServiceImpl.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\services\AuthService.java
+C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\manager\UserManager.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\models\Roles.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\utils\TokenGenerator.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\models\Time.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\services\SampleService.java
+C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\services\UserService.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\dao\UserDao.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\ir\asta\training\contacts\manager\ContactManager.java
 C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\back end\ir.asta.training.contacts\src\main\java\models\Book.java

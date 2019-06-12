@@ -1,0 +1,18 @@
+package ir.asta.training.contacts.services.impl;
+
+import javax.inject.Named;
+
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.training.contacts.services.UserService;
+import ir.asta.wise.core.datamanagement.ActionResult;
+
+@Named("userService")
+public class UserServiceImpl implements UserService {
+
+	@Override
+	public ActionResult<UserEntity> getResponsibleUsers(String token) {
+		
+		return null;
+	}
+
+}

@@ -1,0 +1,19 @@
+package ir.asta.training.contacts.manager;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.springframework.transaction.annotation.Transactional;
+
+import ir.asta.training.contacts.dao.UserDao;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.wise.core.datamanagement.ActionResult;
+import models.Roles;
+import utils.TokenGenerator;
+
+public class UserManager {
+
+}

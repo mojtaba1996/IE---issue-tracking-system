@@ -8,9 +8,7 @@ import javax.ws.rs.core.Context;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import ir.asta.training.contacts.dao.ContactDao;
 import ir.asta.training.contacts.dao.UserDao;
-import ir.asta.training.contacts.entities.ContactEntity;
 import ir.asta.training.contacts.entities.UserEntity;
 import ir.asta.wise.core.datamanagement.ActionResult;
 import models.Roles;
@@ -76,6 +74,10 @@ public class AuthManager {
 			answer.setData(true);
 			answer.setSuccess(true);
 			answer.setMessage("با موفقتیت خارج شد");
+		}
+		else{
+			answer.setSuccess(false);
+			answer.setMessage("خطا در هنگام خروج");
 		}
 		return answer;
 	}
