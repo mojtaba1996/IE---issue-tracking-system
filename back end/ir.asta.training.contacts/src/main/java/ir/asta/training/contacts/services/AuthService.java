@@ -52,4 +52,9 @@ public interface AuthService {
 	@Path("/isnewusername/{username}")
 	public ActionResult<Boolean> isNewUsername(@PathParam("username") String username);
 	
+	@GET
+	@Path("/validatetoken/{token}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String validateToken(@PathParam("token") String token);
+	
 }

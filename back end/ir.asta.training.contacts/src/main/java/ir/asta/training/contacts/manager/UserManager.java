@@ -38,5 +38,27 @@ public class UserManager {
 		}
 		return answer;
 	}
+	@Transactional
+	public ActionResult<Boolean> addConfirmedUser(UserEntity user){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		if (user.getPassword().equals("qweasdzxc")){
+			if(dao.save(user)){
+				answer.setSuccess(true);
+				answer.setData(true);
+				answer.setMessage("با موفقیت ذخیره شد");
+			}
+			else{
+				answer.setSuccess(false);
+				answer.setSuccess(false);
+				answer.setMessage("خطا در هنگام ذخیره کردن کاربر");
+			}
+		}
+		else{
+			answer.setSuccess(false);
+			answer.setData(false);
+			answer.setMessage("رمز عبور اشتباه است");
+		}
+		return answer;
+	}
 
 }

@@ -28,4 +28,9 @@ public class UserServiceImpl implements UserService {
 		return manager.getResponsibleUsers(token, request);
 	}
 
+	@Override
+	public ActionResult<Boolean> addConfirmedUser(UserEntity user) {
+		return manager.addConfirmedUser(user);
+	}
+
 }

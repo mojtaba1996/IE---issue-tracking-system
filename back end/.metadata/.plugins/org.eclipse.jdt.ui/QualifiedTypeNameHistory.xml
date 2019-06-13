@@ -4,4 +4,5 @@
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.services.UserService"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.manager.UserManager"/>
+<fullyQualifiedTypeName name="javax.ws.rs.core.MediaType"/>
 </qualifiedTypeNameHistroy>

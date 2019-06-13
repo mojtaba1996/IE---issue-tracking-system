@@ -1,0 +1,31 @@
+package ir.asta.training.contacts.services.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.training.contacts.manager.AuthManager;
+import ir.asta.training.contacts.manager.UserManager;
+import ir.asta.training.contacts.services.UserService;
+import ir.asta.wise.core.datamanagement.ActionResult;
+
+@Named("userService")
+public class UserServiceImpl implements UserService {
+	
+	@Context HttpServletRequest request;
+	@Context HttpServletResponse response;
+	
+	@Inject
+	UserManager manager;
+
+	@Override
+	public ActionResult<List<UserEntity>> getResponsibleUsers(String token) {
+		return manager.getResponsibleUsers(token, request);
+	}
+
+}

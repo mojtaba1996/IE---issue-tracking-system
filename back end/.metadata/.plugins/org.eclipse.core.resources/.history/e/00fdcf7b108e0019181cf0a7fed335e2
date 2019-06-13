@@ -1,0 +1,130 @@
+package ir.asta.training.contacts.manager;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.springframework.transaction.annotation.Transactional;
+
+import ir.asta.training.contacts.dao.UserDao;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.wise.core.datamanagement.ActionResult;
+import models.Roles;
+import utils.TokenGenerator;
+
+@Named("authManager")
+public class AuthManager {
+	
+	@Inject
+	UserDao dao;
+	
+	@Transactional
+	public ActionResult<UserEntity> signup(UserEntity user, @Context HttpServletRequest request) {
+		TokenGenerator tg = new TokenGenerator();
+		ActionResult<UserEntity> newUser = new ActionResult<UserEntity>();
+		if(!dao.isNewUsername(user.getUsername())){
+			newUser.setSuccess(false);
+			newUser.setMessage("نام کاربری تکراری است");
+			return newUser;
+		}
+		if(user.getPassword().length()<8){
+			newUser.setSuccess(false);
+			newUser.setMessage("رمز عبور کوتاه است");
+			return newUser;
+		}
+		if(user.getRole() != Roles.STUDENT){
+			user.setConfirmed(false);
+		}
+		user.setToken(tg.generateToken(user.getUsername()));
+		if(dao.save(user)){
+			newUser.setData(user);
+			newUser.setMessage("با موفقیت عضو شد");
+			newUser.setSuccess(true);
+		}
+		request.getSession().setAttribute("token", user.getToken());
+		request.getSession().setAttribute("token", user.getId());
+		return newUser;
+	}
+	
+	public ActionResult<UserEntity> login(UserEntity user, @Context HttpServletRequest request){
+		TokenGenerator tg = new TokenGenerator();
+		ActionResult<UserEntity> newUser = new ActionResult<UserEntity>(); 
+		newUser.setData(dao.exist(user));
+		if (newUser.getData() == null){
+			newUser.setMessage("نام کاربری وجود ندارد");
+		}else if (newUser.getData().getPassword().equals(user.getPassword())){
+			newUser.setSuccess(true);
+			newUser.getData().setToken(tg.generateToken(user.getUsername()));
+			request.getSession().setAttribute("token", newUser.getData().getToken());
+			request.getSession().setAttribute("user_id", newUser.getData().getId());
+		}
+		else{
+			newUser.setMessage("رمز عبور اشتباه وارد شده است");
+		}
+		return newUser;
+	}
+	
+	public ActionResult<Boolean> logout(UserEntity user, @Context HttpServletRequest request){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		if (request.getSession().getAttribute("token").equals(user.getToken())){
+			request.getSession().setAttribute("token", "");
+			request.getSession().setAttribute("user_id", "");
+			answer.setData(true);
+			answer.setSuccess(true);
+			answer.setMessage("با موفقتیت خارج شد");
+		}
+		else{
+			answer.setSuccess(false);
+			answer.setMessage("خطا در هنگام خروج");
+		}
+		return answer;
+	}
+	
+	@Transactional
+	public ActionResult<Boolean> deleteUser(int id){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		if (dao.deleteUser(id)){
+			answer.setData(true);
+			answer.setSuccess(true);
+			answer.setMessage("کاربر با موفقیت حذف شد");
+		}
+		else{
+			answer.setData(false);
+			answer.setMessage("کاربر حذف نشد");
+		}
+		return answer;
+	}
+	
+	@Transactional
+	public ActionResult<Boolean> clearAllUsers(){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		try{
+			dao.clearAllUsers();
+			answer.setData(true);
+			answer.setSuccess(true);
+			answer.setMessage("همگی حذف شدند");
+		}catch(Exception e){
+			answer.setData(false);
+			answer.setSuccess(false);
+			answer.setMessage(e.getMessage());
+		}
+		return answer;
+	}
+	
+	public ActionResult<Boolean> isNewUsername(String username){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		boolean isNew = dao.isNewUsername(username);
+		answer.setData(isNew);
+		answer.setSuccess(true);
+		return answer;
+	}
+
+	public String validateToken(String token, @Context HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+}

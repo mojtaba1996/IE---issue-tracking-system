@@ -68,7 +68,12 @@ public class AuthManager {
 	
 	public ActionResult<Boolean> logout(UserEntity user, @Context HttpServletRequest request){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
-		if (request.getSession().getAttribute("token").equals(user.getToken())){
+		if (request.getSession().getAttribute("token") == null){
+			answer.setSuccess(true);
+			answer.setMessage("شما در حال حاضر خارج شده هستید");
+			answer.setData(true);
+		}
+		else if (request.getSession().getAttribute("token").equals(user.getToken())){
 			request.getSession().setAttribute("token", "");
 			request.getSession().setAttribute("user_id", "");
 			answer.setData(true);
@@ -119,6 +124,15 @@ public class AuthManager {
 		answer.setData(isNew);
 		answer.setSuccess(true);
 		return answer;
+	}
+
+	public String validateToken(String token, @Context HttpServletRequest request) {
+		if(token.equals(request.getSession().getAttribute("token"))){
+			return "true";
+		}
+		else{
+			return "false";
+		}
 	}
 	
 	

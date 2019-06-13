@@ -57,4 +57,9 @@ public class AuthServiceImpl implements AuthService {
 		return manager.logout(user, request);
 	}
 
+	@Override
+	public String validateToken(String token) {
+		return manager.validateToken(token, request);
+	}
+
 }

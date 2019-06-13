@@ -22,5 +22,11 @@ public interface UserService {
 	@Path("/getResponsibleUsers/{token}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ActionResult<List<UserEntity>> getResponsibleUsers(@PathParam("token") String token);
-
+	
+	@POST
+	@Path("/addconfirmeduser")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ActionResult<Boolean> addConfirmedUser(UserEntity user);
+	
 }
