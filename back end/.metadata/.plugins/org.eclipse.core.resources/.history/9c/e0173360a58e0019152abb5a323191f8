@@ -1,0 +1,5 @@
+package ir.asta.training.contacts.entities;
+
+public class CaceEntity {
+
+}

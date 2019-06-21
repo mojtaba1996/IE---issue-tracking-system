@@ -1,0 +1,5 @@
+package utils;
+
+public class Settings {
+	public static String password = "b40wR2wCCoP"; 
+}

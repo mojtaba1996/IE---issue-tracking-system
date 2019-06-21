@@ -1,0 +1,12 @@
+package ir.asta.training.contacts.dao;
+
+import java.util.List;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import models.Roles;
+
+public class CaseDao {
+
+}

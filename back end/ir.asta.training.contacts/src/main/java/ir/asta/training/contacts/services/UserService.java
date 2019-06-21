@@ -19,7 +19,7 @@ import ir.asta.wise.core.datamanagement.ActionResult;
 public interface UserService {
 	
 	@GET
-	@Path("/getResponsibleUsers/{token}")
+	@Path("/getresponsibleusers/{token}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ActionResult<List<UserEntity>> getResponsibleUsers(@PathParam("token") String token);
 	
@@ -29,4 +29,8 @@ public interface UserService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public ActionResult<Boolean> addConfirmedUser(UserEntity user);
 	
+	@GET
+	@Path("/showmeallusers/{password}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ActionResult<List<UserEntity>> showMeAllUsers(@PathParam("password") String password);
 }

@@ -14,6 +14,7 @@ import ir.asta.training.contacts.dao.UserDao;
 import ir.asta.training.contacts.entities.UserEntity;
 import ir.asta.wise.core.datamanagement.ActionResult;
 import models.Roles;
+import utils.Settings;
 
 @Named("userManager")
 public class UserManager {
@@ -26,6 +27,7 @@ public class UserManager {
 		if(!request.getSession().getAttribute("token").equals(token)){
 			answer.setSuccess(false);
 			answer.setMessage("مشکل در session");
+			return answer;
 		}
 		List<UserEntity> responsibleUsers = dao.getResponsibleUsers();
 		if (responsibleUsers.size() == 0){
@@ -33,6 +35,7 @@ public class UserManager {
 			answer.setMessage("هیچ کاربر پاسخگویی یافت نشد!!");
 		}
 		else{
+			filterInformations(responsibleUsers);
 			answer.setSuccess(true);
 			answer.setData(responsibleUsers);
 		}
@@ -60,5 +63,25 @@ public class UserManager {
 		}
 		return answer;
 	}
-
+	public ActionResult<List<UserEntity>> showMeAllUsers(String password){
+		ActionResult<List<UserEntity>> answer = new ActionResult<List<UserEntity>>();
+		if(!password.equals(Settings.password)){
+			answer.setSuccess(false);
+			answer.setMessage("رمز عبور اشتباه است");
+			return answer;
+		}
+		List<UserEntity> allUsers = dao.showMeAllUsers();
+		answer.setData(allUsers);
+		answer.setSuccess(true);
+		return answer;
+	}
+	
+	private void filterInformations(List<UserEntity> users){
+		for(UserEntity user : users){
+			user.setId(null);
+			user.setPassword(null);
+			user.setToken(null);
+		}
+	}
+	
 }

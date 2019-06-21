@@ -33,4 +33,9 @@ public class UserServiceImpl implements UserService {
 		return manager.addConfirmedUser(user);
 	}
 
+	@Override
+	public ActionResult<List<UserEntity>> showMeAllUsers(String password) {
+		return manager.showMeAllUsers(password);
+	}
+
 }

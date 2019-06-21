@@ -1,0 +1,33 @@
+package ir.asta.training.contacts.manager;
+
+import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+import org.springframework.transaction.annotation.Transactional;
+import org.json.*;
+import ir.asta.training.contacts.dao.CaseDao;
+import ir.asta.training.contacts.entities.CaseEntity;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.wise.core.datamanagement.ActionResult;
+
+@Named("caseManager")
+public class CaseManager {
+	
+	@Inject
+	CaseDao dao;
+	
+	@Transactional
+	public ActionResult<CaseEntity> postNewCase(String newCaseString){
+		ActionResult<CaseEntity> answer = new ActionResult<CaseEntity>();
+		
+		if(dao.save(newCase)){
+			answer.setData(newCase);
+			answer.setSuccess(true);
+			answer.setMessage("مورد با موفقیت ثبت شد");
+		}
+		return answer;
+	}
+}

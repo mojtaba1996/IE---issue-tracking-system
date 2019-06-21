@@ -13,7 +13,7 @@ import ir.asta.training.contacts.entities.ContactEntity;
 import ir.asta.training.contacts.entities.UserEntity;
 import models.Roles;
 
-@Named("authDao")
+@Named("userDao")
 public class UserDao {
 	
 	@PersistenceContext
@@ -64,8 +64,21 @@ public class UserDao {
 
 	public List<UserEntity> getResponsibleUsers(){
 		Roles roles = new Roles();
-		Query q = entityManager.createQuery("select u.firstname, u.lastname, u.username, u.role from UserEntity u where u.role <> :role and u.confirmed = True");
+		Query q = entityManager.createQuery("select u from UserEntity u where u.role <> :role and u.confirmed = True", UserEntity.class);
 		q.setParameter("role", roles.STUDENT);
-		return q.getResultList();
+		List<UserEntity> results = q.getResultList();
+		return results;
+	}
+	
+	public UserEntity getUserByUsername(String username){
+		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username");
+		q.setParameter("username", username);
+		return (UserEntity) q.getResultList().get(0);
+	}
+	
+	public List<UserEntity> showMeAllUsers(){
+		Query q = entityManager.createQuery("select u from UserEntity u");
+		List<UserEntity> results = q.getResultList();
+		return results;
 	}
 }

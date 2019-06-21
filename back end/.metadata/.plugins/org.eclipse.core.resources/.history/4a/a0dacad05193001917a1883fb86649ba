@@ -1,0 +1,33 @@
+package ir.asta.training.contacts.services.impl;
+
+import java.text.ParseException;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.json.JSONException;
+
+import ir.asta.training.contacts.entities.CaseEntity;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.training.contacts.manager.AuthManager;
+import ir.asta.training.contacts.manager.CaseManager;
+import ir.asta.training.contacts.services.CaseService;
+import ir.asta.wise.core.datamanagement.ActionResult;
+
+@Named("caseService")
+public class CaseServiceImpl implements CaseService {
+	@Context HttpServletRequest request;
+	@Context HttpServletResponse response;
+	
+	@Inject
+	CaseManager manager;
+
+	@Override
+	public ActionResult<CaseEntity> postNewCase(String newCaseString){
+		return manager.postNewCase(newCaseString);
+	}
+
+}

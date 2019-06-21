@@ -1,0 +1,29 @@
+package ir.asta.training.contacts.manager;
+
+import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+import org.springframework.transaction.annotation.Transactional;
+
+import ir.asta.training.contacts.dao.CaseDao;
+import ir.asta.training.contacts.entities.CaseEntity;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.wise.core.datamanagement.ActionResult;
+
+@Named("caseManager")
+public class CaseManager {
+	
+	@Inject
+	CaseDao dao;
+	
+	@Transactional
+	public ActionResult<CaseEntity> postNewCase(CaseEntity newCase){
+		ActionResult<CaseEntity> answer = 
+		if(dao.save(newCase)){
+			
+		}
+	}
+}

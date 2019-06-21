@@ -5,4 +5,15 @@
 <fullyQualifiedTypeName name="ir.asta.training.contacts.services.UserService"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.manager.UserManager"/>
 <fullyQualifiedTypeName name="javax.ws.rs.core.MediaType"/>
+<fullyQualifiedTypeName name="javax.persistence.ManyToOne"/>
+<fullyQualifiedTypeName name="javax.persistence.JoinColumn"/>
+<fullyQualifiedTypeName name="ir.asta.training.contacts.dao.CaseDao"/>
+<fullyQualifiedTypeName name="ir.asta.training.contacts.entities.CaseEntity"/>
+<fullyQualifiedTypeName name="org.json.JSONTokener"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="java.text.DateFormat"/>
+<fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
+<fullyQualifiedTypeName name="ir.asta.training.contacts.dao.UserDao"/>
+<fullyQualifiedTypeName name="models.Status"/>
+<fullyQualifiedTypeName name="utils.Settings"/>
 </qualifiedTypeNameHistroy>

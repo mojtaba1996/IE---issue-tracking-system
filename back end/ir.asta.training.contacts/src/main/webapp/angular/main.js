@@ -844,7 +844,8 @@ var CaseService = /** @class */ (function () {
     };
     /** POST: add a new case to the server */
     CaseService.prototype.addCase = function (newCase) {
-        return this.http.post(this.casesUrl, newCase, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('addUser')));
+        var url = "http://localhost:8080/contacts/rest/case/postnewcase";
+        return this.http.post(url, newCase, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('addCase')));
     };
     /** PUT: update the case on the server */
     CaseService.prototype.updateCase = function (acase) {
@@ -1044,7 +1045,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_username}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let user of users\" (value) = \"user.username\">\n              <!--{{user.firstname}}&nbsp;{{user.lastname}}-->{{user.username}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
+module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_user}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let user of users\" (value) = \"user.username\">\n              <!--{{user.firstname}}&nbsp;{{user.lastname}}-->{{user.username}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
 
 /***/ }),
 
@@ -1100,14 +1101,14 @@ var FulfillComponent = /** @class */ (function () {
             this.caseService.getCases().subscribe(function (cases) { return _this.cases = cases.filter(function (acase) { return acase.status != _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED; }); });
         }
         else {
-            this.caseService.getSomeCases('responsible_username', this.authService.username).subscribe(function (cases) {
+            this.caseService.getSomeCases('responsible_user', this.authService.username).subscribe(function (cases) {
                 return _this.cases = cases.filter(function (acase) { return acase.status != _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED; });
             });
         }
     };
     FulfillComponent.prototype.refer = function (acase) {
         var _this = this;
-        acase.responsible_username = this.fulfill_form.get('refer_to').value;
+        acase.responsible_user = this.fulfill_form.get('refer_to').value;
         acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].INQUEUE;
         acase.description = this.fulfill_form.get('description').value;
         this.caseService.updateCase(acase).subscribe(function () { return _this.getCases(); });
@@ -1605,7 +1606,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc white_text\">\n  <table>\n    <tr>\n      <th>\n        عنوان مورد\n      </th>\n      <th>\n        تاریخ ثبت\n      </th>\n      <th>\n        متن و توضیحات\n      </th>\n      <th>\n        مسئول پیگیری\n      </th>\n      <th>\n        وضعیت\n      </th>\n      <th>\n          توضیحات\n        </th>\n    </tr>\n    <tr *ngFor = \"let acase of cases\" >\n      <td>\n        {{acase.topic}}\n      </td>\n      <td>\n          {{acase.date | date}}\n      </td>\n      <td>\n        {{acase.content}}\n      </td>\n      <td>\n        {{acase.responsible_username}}\n      </td>\n      <td>\n        {{acase.status}}\n      </td>\n      <td>\n          {{acase.description}}\n        </td>\n    </tr>\n  </table>\n</div>"
+module.exports = "<div class=\"rc white_text\">\n  <table>\n    <tr>\n      <th>\n        عنوان مورد\n      </th>\n      <th>\n        تاریخ ثبت\n      </th>\n      <th>\n        متن و توضیحات\n      </th>\n      <th>\n        مسئول پیگیری\n      </th>\n      <th>\n        وضعیت\n      </th>\n      <th>\n          توضیحات\n        </th>\n    </tr>\n    <tr *ngFor = \"let acase of cases\" >\n      <td>\n        {{acase.topic}}\n      </td>\n      <td>\n          {{acase.date | date}}\n      </td>\n      <td>\n        {{acase.content}}\n      </td>\n      <td>\n        {{acase.responsible_user}}\n      </td>\n      <td>\n        {{acase.status}}\n      </td>\n      <td>\n          {{acase.description}}\n        </td>\n    </tr>\n  </table>\n</div>"
 
 /***/ }),
 
@@ -1842,7 +1843,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id = \"post_new_case\" class=\"rc\">\n  <form [formGroup] = post_new_case_form (ngSubmit) = \"onSubmit()\" >\n      <label>\n        موضوع:\n        <select formControlName = \"topic\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let topic of topics\" [ngValue]=\"topic\">\n              {{topic}}\n            </option>\n          </select>\n      </label>\n      <label>\n        متن توضیحات:\n        <textarea formControlName = \"content\"></textarea>\n      </label>\n      <br><br><br>\n      <label>\n        مسئول رسیدگی:\n        <select formControlName = \"responsible_username\">\n          <option value=\"\">انتخاب کنید</option>\n          <option *ngFor = \"let responsible_user of responsible_users\" (value) = \"responsible_user.username\">\n            {{responsible_user.username}}\n          </option>\n        </select>\n      </label>\n      <button type=\"submit\" [disabled]=\"!post_new_case_form.valid\">ثبت</button>\n  </form>\n</div>\n"
+module.exports = "<div id = \"post_new_case\" class=\"rc\">\n  <form [formGroup] = post_new_case_form (ngSubmit) = \"onSubmit()\" >\n      <label>\n        موضوع:\n        <select formControlName = \"topic\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let topic of topics\" [ngValue]=\"topic\">\n              {{topic}}\n            </option>\n          </select>\n      </label>\n      <label>\n        متن توضیحات:\n        <textarea formControlName = \"content\"></textarea>\n      </label>\n      <br><br><br>\n      <label>\n        مسئول رسیدگی:\n        <select formControlName = \"responsible_user\">\n          <option value=\"\">انتخاب کنید</option>\n          <option *ngFor = \"let responsible_user of responsible_users\" value = \"{{responsible_user.username}}\">\n            {{responsible_user.firstname}} {{responsible_user.lastname}}\n          </option>\n        </select>\n      </label>\n      <button type=\"submit\" [disabled]=\"!post_new_case_form.valid\">ثبت</button>\n  </form>\n</div>\n"
 
 /***/ }),
 
@@ -1880,12 +1881,19 @@ var PostNewCaseComponent = /** @class */ (function () {
         this.post_new_case_form = new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormGroup"]({
             topic: new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_2__["Validators"].required),
             content: new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_2__["Validators"].required),
-            responsible_username: new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_2__["Validators"].required)
+            responsible_user: new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_2__["Validators"].required)
         });
     }
     PostNewCaseComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.userService.getUsesrs().subscribe(function (responsible_users) { return _this.responsible_users = responsible_users.filter(function (responsible_user) { return responsible_user.role != _models__WEBPACK_IMPORTED_MODULE_3__["Roles"].STUDENT; }); });
+        this.userService.getResponsibleUsers().subscribe(function (answer) {
+            if (answer.success) {
+                _this.responsible_users = answer.data;
+            }
+            else {
+                alert(answer.message);
+            }
+        });
         this.topics.push(_models__WEBPACK_IMPORTED_MODULE_3__["Topics"].COMPLAINT);
         this.topics.push(_models__WEBPACK_IMPORTED_MODULE_3__["Topics"].ENTEGHAD);
         this.topics.push(_models__WEBPACK_IMPORTED_MODULE_3__["Topics"].REQUEST);
@@ -1897,18 +1905,23 @@ var PostNewCaseComponent = /** @class */ (function () {
     PostNewCaseComponent.prototype.post_new_case = function () {
         var topic_inserted = this.post_new_case_form.get('topic').value;
         var content_inserted = this.post_new_case_form.get('content').value;
-        var responsible_username_inserted = this.post_new_case_form.get('responsible_username').value;
+        var responsible_user_inserted = this.post_new_case_form.get('responsible_user').value;
         this.post_new_case_form.reset();
         var new_case = {
-            poster_username: this.authService.username,
-            date: new Date(),
+            poster_username: localStorage.getItem("username"),
+            date: new Date,
             topic: topic_inserted,
             content: content_inserted,
-            responsible_username: responsible_username_inserted,
+            responsible_user: responsible_user_inserted,
             status: _models__WEBPACK_IMPORTED_MODULE_3__["Status"].OPEN,
             description: '',
+            token: localStorage.getItem('token'),
         };
-        this.caseService.addCase(new_case).subscribe();
+        console.log(localStorage.getItem('token'));
+        console.log(new_case.token);
+        this.caseService.addCase(new_case).subscribe(function (answer) {
+            alert(answer.message);
+        });
     };
     PostNewCaseComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -2215,8 +2228,8 @@ var UserService = /** @class */ (function () {
                 'Content-Type': 'application/json',
             })
         };
-        var url = "http://localhost:8080/contacts/rest/users/getResponsibleUsers/" + localStorage.getItem('token');
-        return this.http.get(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("getResponsibleUsers")));
+        var url = "http://localhost:8080/contacts/rest/users/getresponsibleusers/" + localStorage.getItem('token');
+        return this.http.get(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("getresponsibleusers")));
     };
     /** GET heroes from the server */
     UserService.prototype.getUsesrs = function () {

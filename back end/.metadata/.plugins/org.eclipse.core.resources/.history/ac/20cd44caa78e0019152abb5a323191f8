@@ -1,0 +1,51 @@
+package ir.asta.training.contacts.entities;
+
+import java.util.Date;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="WISE_CASE")
+public class CaceEntity {
+	
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	Long id;
+	
+	@ManyToOne
+	@JoinColumn(name = "poster_user")
+	UserEntity poster_user;
+	
+	@ManyToOne
+	@JoinColumn(name = "responsible_user")
+	UserEntity responsible_user;
+	
+	@Basic
+	@Column(name = "date")
+	Date date;
+	
+	@Basic
+	@Column(name = "topic")
+	String topic;
+	
+	@Basic
+	@Column(name = "topic")
+	String content;
+	
+	@Basic
+	@Column(name = "status")
+	String status;
+	
+	@Basic
+	@Column(name = "description")
+	String description;
+}

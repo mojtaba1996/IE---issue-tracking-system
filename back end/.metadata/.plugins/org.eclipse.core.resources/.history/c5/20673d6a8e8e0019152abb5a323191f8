@@ -1,0 +1,72 @@
+package ir.asta.training.contacts.dao;
+
+
+
+import java.util.List;
+
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import ir.asta.training.contacts.entities.ContactEntity;
+import ir.asta.training.contacts.entities.UserEntity;
+import models.Roles;
+
+@Named("authDao")
+public class UserDao {
+	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
+	public boolean save(UserEntity user) {
+		if (!entityManager.contains(user)){
+			entityManager.persist(user);
+			return true;
+		}
+		return false;
+	}
+	
+	public UserEntity exist(UserEntity user){
+		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username", UserEntity.class);
+		q.setParameter("username", user.getUsername());
+		List<UserEntity> results = q.getResultList();
+		if (results.size()==1){
+			return results.get(0);
+		}
+		else{
+			return null;
+		}
+	}
+	
+	public boolean deleteUser(int id){
+		boolean answer = false;
+		UserEntity userToDelete = entityManager.find(UserEntity.class, new Long(id));
+		if (userToDelete != null){
+			entityManager.remove(userToDelete);
+			answer = true;
+		}
+		return answer;
+	}
+	
+	public void clearAllUsers(){
+		Query q = entityManager.createQuery("DELETE FROM UserEntity");
+		q.executeUpdate();
+	}
+	
+
+	public boolean isNewUsername(String username){
+		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username");
+		q.setParameter("username", username);
+		List<UserEntity> result = q.getResultList();
+		return result.size() == 0;
+	}
+
+	public List<UserEntity> getResponsibleUsers(){
+		Roles roles = new Roles();
+		Query q = entityManager.createQuery("select u.firstname, u.lastname, u.username, u.role from UserEntity u where u.role <> :role and u.confirmed = True");
+		q.setParameter("role", roles.STUDENT);
+		List<UserEntity> resutls = q.getResultList()
+		return resutls;
+	}
+}
