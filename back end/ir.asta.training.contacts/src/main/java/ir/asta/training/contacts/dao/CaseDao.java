@@ -5,18 +5,21 @@ import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
 import ir.asta.training.contacts.entities.CaseEntity;
 import models.Roles;
+import models.Status;
 
 @Named("caseDao")
 public class CaseDao {
+	
+	Status status = new Status();
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	public boolean save(CaseEntity casee){
-		if(!entityManager.contains(casee)){
-			entityManager.persist(casee);
+	public boolean save(CaseEntity acase){
+		if(!entityManager.contains(acase)){
+			entityManager.persist(acase);
 			return true;
 		}
 		else{
@@ -30,9 +33,36 @@ public class CaseDao {
 		int count = q.executeUpdate();
 		return count == 1;
 	}
+	
 	public int deleteAllCases(){
 		Query q = entityManager.createQuery("DELETE FROM CaseEntity");
 		int count = q.executeUpdate();
 		return count;
+	}
+	
+	public List<CaseEntity> getMyCases(String username){
+		Query q = entityManager.createQuery("SELECT c FROM CaseEntity c WHERE c.poster_user.username = :username");
+		q.setParameter("username", username);
+		List<CaseEntity> cases = q.getResultList();
+		return cases;
+	}
+	
+	public List<CaseEntity> getMyCasesToFulfill(String username){
+		Query q;
+		if(username.equals("")){q = entityManager.createQuery("SELECT c FROM CaseEntity C");}
+		else{q = entityManager.createQuery("SELECT c FROM CaseEntity c WHERE c.responsible_user.username = :username AND c.status <> :status");}
+		q.setParameter("username", username);
+		q.setParameter("status", this.status.CLOSED);
+		List<CaseEntity> cases = q.getResultList();
+		return cases;
+	}
+	
+	public boolean updateCase(CaseEntity acase){
+		if(entityManager.contains(acase)){
+			entityManager.merge(acase);
+			return true;
+		}else{
+			return false;
+		}
 	}
 }

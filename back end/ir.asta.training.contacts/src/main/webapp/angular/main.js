@@ -847,9 +847,25 @@ var CaseService = /** @class */ (function () {
         var url = "http://localhost:8080/contacts/rest/case/postnewcase";
         return this.http.post(url, newCase, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('addCase')));
     };
+    CaseService.prototype.getMyCases = function () {
+        var url = "http://localhost:8080/contacts/rest/case/getmycases/" +
+            localStorage.getItem("username") + "/" +
+            localStorage.getItem("token");
+        return this.http.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('getmycases')));
+    };
+    CaseService.prototype.getMyCasesToFulfill = function () {
+        var url = "http://localhost:8080/contacts/rest/case/getmycasestofulfill/" +
+            localStorage.getItem("username") + "/" +
+            localStorage.getItem("token");
+        return this.http.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('getmycasestofulfill')));
+    };
     /** PUT: update the case on the server */
     CaseService.prototype.updateCase = function (acase) {
-        return this.http.put(this.casesUrl, acase, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('updateCase')));
+        var httpOptions = {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({ 'Content-Type': 'application/json' })
+        };
+        var url = "http://localhost:8080/contacts/rest/case/updateacase";
+        return this.http.put(url, acase, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('updateacase')));
     };
     CaseService.prototype.handleError = function (operation, result) {
         if (operation === void 0) { operation = 'operation'; }
@@ -1045,7 +1061,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_user}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let user of users\" (value) = \"user.username\">\n              <!--{{user.firstname}}&nbsp;{{user.lastname}}-->{{user.username}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
+module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_user.username}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let responsibleUser of responsibleUsers\" value = \"{{responsibleUser.username}}\">\n              {{responsibleUser.firstname}} {{responsibleUser.lastname}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
 
 /***/ }),
 
@@ -1079,7 +1095,7 @@ var FulfillComponent = /** @class */ (function () {
         this.authService = authService;
         this.userService = userService;
         this.cases = [];
-        this.users = [];
+        this.responsibleUsers = [];
         this.fulfill_form = new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormGroup"]({
             description: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"](''),
             refer_to: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"](''),
@@ -1091,39 +1107,36 @@ var FulfillComponent = /** @class */ (function () {
     };
     FulfillComponent.prototype.getResponsibleUsers = function () {
         var _this = this;
-        this.userService.getUsesrs().subscribe(function (users) {
-            return _this.users = users.filter(function (user) { return user.role != _models__WEBPACK_IMPORTED_MODULE_3__["Roles"].STUDENT; });
+        this.userService.getResponsibleUsers().subscribe(function (answer) {
+            if (answer.success) {
+                _this.responsibleUsers = answer.data;
+            }
         });
     };
     FulfillComponent.prototype.getCases = function () {
         var _this = this;
-        if (this.authService.role == _models__WEBPACK_IMPORTED_MODULE_3__["Roles"].MANAGER) {
-            this.caseService.getCases().subscribe(function (cases) { return _this.cases = cases.filter(function (acase) { return acase.status != _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED; }); });
-        }
-        else {
-            this.caseService.getSomeCases('responsible_user', this.authService.username).subscribe(function (cases) {
-                return _this.cases = cases.filter(function (acase) { return acase.status != _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED; });
-            });
-        }
+        console.log(1111111111);
+        this.caseService.getMyCasesToFulfill().subscribe(function (answer) {
+            if (answer.success) {
+                _this.cases = answer.data;
+            }
+        });
     };
     FulfillComponent.prototype.refer = function (acase) {
         var _this = this;
-        acase.responsible_user = this.fulfill_form.get('refer_to').value;
+        console.log(this.fulfill_form.get('refer_to').value);
+        var responsibleUser = {
+            username: this.fulfill_form.get('refer_to').value,
+        };
+        acase.responsible_user = responsibleUser;
         acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].INQUEUE;
         acase.description = this.fulfill_form.get('description').value;
+        acase.token = localStorage.getItem('token');
         this.caseService.updateCase(acase).subscribe(function () { return _this.getCases(); });
     };
     FulfillComponent.prototype.close = function (acase) {
-        var _this = this;
-        acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED;
-        acase.description = this.fulfill_form.get('description').value;
-        this.caseService.updateCase(acase).subscribe(function () { return _this.getCases(); });
     };
     FulfillComponent.prototype.postpone = function (acase) {
-        var _this = this;
-        acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].POSTPONED;
-        acase.description = this.fulfill_form.get('description').value;
-        this.caseService.updateCase(acase).subscribe(function () { return _this.getCases(); });
     };
     FulfillComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -1606,7 +1619,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc white_text\">\n  <table>\n    <tr>\n      <th>\n        عنوان مورد\n      </th>\n      <th>\n        تاریخ ثبت\n      </th>\n      <th>\n        متن و توضیحات\n      </th>\n      <th>\n        مسئول پیگیری\n      </th>\n      <th>\n        وضعیت\n      </th>\n      <th>\n          توضیحات\n        </th>\n    </tr>\n    <tr *ngFor = \"let acase of cases\" >\n      <td>\n        {{acase.topic}}\n      </td>\n      <td>\n          {{acase.date | date}}\n      </td>\n      <td>\n        {{acase.content}}\n      </td>\n      <td>\n        {{acase.responsible_user}}\n      </td>\n      <td>\n        {{acase.status}}\n      </td>\n      <td>\n          {{acase.description}}\n        </td>\n    </tr>\n  </table>\n</div>"
+module.exports = "<div class=\"rc white_text\">\n  <table>\n    <tr>\n      <th>\n        عنوان مورد\n      </th>\n      <th>\n        تاریخ ثبت\n      </th>\n      <th>\n        متن و توضیحات\n      </th>\n      <th>\n        مسئول پیگیری\n      </th>\n      <th>\n        وضعیت\n      </th>\n      <th>\n          توضیحات\n        </th>\n    </tr>\n    <tr *ngFor = \"let acase of cases\" >\n      <td>\n        {{acase.topic}}\n      </td>\n      <td>\n          {{acase.date | date}}\n      </td>\n      <td>\n        {{acase.content}}\n      </td>\n      <td>\n        {{acase.responsible_user.firstname}} {{acase.responsible_user.lastname}}\n      </td>\n      <td>\n        {{acase.status}}\n      </td>\n      <td>\n          {{acase.description}}\n        </td>\n    </tr>\n  </table>\n</div>"
 
 /***/ }),
 
@@ -1639,7 +1652,11 @@ var CheckCasesComponent = /** @class */ (function () {
     };
     CheckCasesComponent.prototype.getCases = function () {
         var _this = this;
-        this.caseService.getSomeCases('poster_username', this.authService.username).subscribe(function (cases) { return _this.cases = cases; });
+        this.caseService.getMyCases().subscribe(function (answer) {
+            if (answer.success) {
+                _this.cases = answer.data;
+            }
+        });
     };
     CheckCasesComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -1731,7 +1748,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div id=\"edit_profile_form\" class=\"rc\">\n    <form [formGroup]=edit_profile_form (ngSubmit) = \"edit()\">\n        <label>\n            نام:\n            <input type=\"text\" formControlName = \"firstname\">\n        </label>\n        <label>\n            نام خانوادگی:\n            <input type=\"text\" formControlName = \"lastname\">\n        </label>\n        <label>\n            شماره کاربری:\n            <input type=\"text\" formControlName = \"username\" disabled>\n        </label>\n        <label>\n            نقش:\n            <select formControlName = \"role\">\n                <option value=\"\">انتخاب کنید</option>\n                <option *ngFor = \"let role of roles\" (value) = \"role\">\n                    {{role}}\n                </option>\n            </select>\n        </label>\n        <label>\n            وضعیت تایید:\n            <input type=\"text\" formControlName = \"confirmed\" disabled>\n        </label>\n        <label>\n            رمز عبور:\n            <input type=\"password\" formControlName = \"password\" >\n        </label>\n        <button type=\"submit\" [disabled]=\"!edit_profile_form.valid || changed()\">ویرایش</button>\n  </form>\n</div>"
+module.exports = "<div id=\"edit_profile_form\" class=\"rc\">\n    <form [formGroup]=edit_profile_form (ngSubmit) = \"edit()\">\n        <label>\n            نام:\n            <input type=\"text\" formControlName = \"firstname\">\n            <div *ngIf=\"firstname.invalid && (firstname.dirty || firstname.touched)\" class=\"alert alert-danger\">\n                <div *ngIf=\"firstname.errors.required\">\n                    {{required_error_message}}\n                </div>\n            </div>\n        </label>\n        <label>\n            نام خانوادگی:\n            <input type=\"text\" formControlName = \"lastname\">\n            <div *ngIf=\"lastname.invalid && (lastname.dirty || lastname.touched)\" class=\"alert alert-danger\">\n                <div *ngIf=\"lastname.errors.required\">\n                    {{required_error_message}}\n                </div>\n            </div>\n        </label>\n        <label>\n            نام کاربری:\n            <input #usernameinput type=\"text\" formControlName = \"username\" (blur) = \"checkUsername(usernameinput)\">\n            <div *ngIf=\"username.invalid && (username.dirty || username.touched)\" class=\"alert alert-danger\">\n                <div *ngIf=\"username.errors.required\">\n                    {{required_error_message}}\n                </div>\n            </div>\n            <div *ngIf = \"username_is_duplicate\" class = \"alert alert-danger\" >\n                نام کاربری نمیتواند تکراری باشد\n            </div>\n        </label>\n        <label>\n            نقش:\n            <select formControlName = \"role\">\n                <option value=\"\">انتخاب کنید</option>\n                <option *ngFor = \"let role of roles\" (value) = \"role\">\n                    {{role}}\n                </option>\n            </select>\n        </label>\n        <label>\n            وضعیت تایید:\n            <input type=\"text\" formControlName = \"confirmed\">\n        </label>\n        <label>\n            رمز عبور:\n            <input #passwordinput type=\"password\" formControlName = \"password\">\n            <div *ngIf=\"password.invalid && (password.dirty || password.touched)\" class=\"alert alert-danger\">\n                <div *ngIf=\"password.errors.required\">\n                    {{required_error_message}}\n                </div>\n                <div *ngIf=\"password.errors.minlength\">\n                    {{minLength_error_message}}\n                </div>\n            </div>\n        </label>\n        <label *ngIf = \"passwordChanged()\">\n            تکرار رمز عبور:\n            <input #cpasswordinput type=\"password\" formControlName = \"confirm_password\">\n            <div *ngIf=\"confirm_password.invalid && (confirm_password.dirty || confirm_password.touched)\" class=\"alert alert-danger\">\n                <div *ngIf=\"confirm_password.errors.required\">\n                    {{required_error_message}}\n                </div>\n            </div>\n            <div *ngIf = \"!checkPassword(passwordinput, cpasswordinput)\" class = \"alert alert-danger\" >\n                رمز عبور همخوانی ندارد\n            </div>\n        </label>\n        <button type=\"submit\" [disabled]=\"!edit_profile_form.valid || not_changed()\">ویرایش</button>\n  </form>\n</div>"
 
 /***/ }),
 
@@ -1751,6 +1768,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _models__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../models */ "./src/app/models.ts");
 /* harmony import */ var _user_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../user.service */ "./src/app/user.service.ts");
 /* harmony import */ var _angular_forms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @angular/forms */ "./node_modules/@angular/forms/fesm5/forms.js");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
+
 
 
 
@@ -1759,23 +1778,67 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var EditProfileComponent = /** @class */ (function () {
-    function EditProfileComponent(authService, userService) {
+    function EditProfileComponent(authService, userService, router) {
         this.authService = authService;
         this.userService = userService;
+        this.router = router;
+        this.username_is_duplicate = false;
+        this.required_error_message = "*";
         this.roles = [];
         this.user = new _models__WEBPACK_IMPORTED_MODULE_3__["User"]();
         this.edit_profile_form = new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormGroup"]({
             firstname: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
             lastname: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
-            username: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
-            role: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
-            confirmed: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
-            password: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
+            username: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]({ value: '', disable: true }, _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
+            role: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]({ value: '', disabled: true }, _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
+            confirmed: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]({ value: '', disabled: true }, _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
+            password: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', [_angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required, _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].minLength(8)]),
+            confirm_password: new _angular_forms__WEBPACK_IMPORTED_MODULE_5__["FormControl"]('', _angular_forms__WEBPACK_IMPORTED_MODULE_5__["Validators"].required),
         });
     }
+    Object.defineProperty(EditProfileComponent.prototype, "firstname", {
+        get: function () { return this.edit_profile_form.get('firstname'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EditProfileComponent.prototype, "lastname", {
+        get: function () { return this.edit_profile_form.get('lastname'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EditProfileComponent.prototype, "username", {
+        get: function () { return this.edit_profile_form.get('username'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EditProfileComponent.prototype, "role", {
+        get: function () { return this.edit_profile_form.get('role'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EditProfileComponent.prototype, "confirmed", {
+        get: function () { return this.edit_profile_form.get('confirmed'); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
+    Object.defineProperty(EditProfileComponent.prototype, "password", {
+        get: function () { return this.edit_profile_form.get('password'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(EditProfileComponent.prototype, "confirm_password", {
+        get: function () { return this.edit_profile_form.get('confirm_password'); },
+        enumerable: true,
+        configurable: true
+    });
     EditProfileComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.userService.getSomeUsesrs('username', this.authService.username).subscribe(function (users) { return _this.set_form_values(users[0]); });
+        this.userService.getUserByUsername().subscribe(function (answer) {
+            if (answer.success) {
+                _this.set_form_values(answer.data);
+            }
+        });
         for (var key in _models__WEBPACK_IMPORTED_MODULE_3__["Roles"]) {
             this.roles.push(_models__WEBPACK_IMPORTED_MODULE_3__["Roles"][key]);
         }
@@ -1789,11 +1852,32 @@ var EditProfileComponent = /** @class */ (function () {
             role: user.role,
             confirmed: user.confirmed,
             password: user.password,
+            confirm_password: user.password,
         });
     };
     EditProfileComponent.prototype.edit = function () {
+        var _this = this;
+        var editUser = {
+            firstname: this.firstname.value,
+            lastname: this.lastname.value,
+            username: this.username.value,
+            password: this.password.value,
+            role: this.role.value || _models__WEBPACK_IMPORTED_MODULE_3__["Roles"].STUDENT,
+            confirmed: this.confirmed.value,
+            token: localStorage.getItem('token'),
+        };
+        if (this.password.value != this.confirm_password.value) {
+            return;
+        }
+        this.userService.updateUser(editUser).subscribe(function (answer) {
+            alert(answer.message);
+            if (answer.success) {
+                var redirect = "/student";
+                _this.router.navigateByUrl(redirect);
+            }
+        });
     };
-    EditProfileComponent.prototype.changed = function () {
+    EditProfileComponent.prototype.not_changed = function () {
         var flag = true;
         if (this.edit_profile_form.get('firstname').value != this.user.firstname) {
             flag = false;
@@ -1809,6 +1893,42 @@ var EditProfileComponent = /** @class */ (function () {
         }
         return flag;
     };
+    EditProfileComponent.prototype.checkUsername = function (input) {
+        var _this = this;
+        if (input.value == "" || input.value == this.user.username) {
+            this.username_is_duplicate = false;
+            input.style.backgroundColor = "white";
+            return;
+        }
+        //input.style.backgroundColor="green";
+        var value = input.value;
+        this.authService.is_new_username(value).subscribe(function (answer) {
+            if (answer.data) {
+                input.style.backgroundColor = _models__WEBPACK_IMPORTED_MODULE_3__["Colors"].GREEN.TEXTBOX;
+                _this.username_is_duplicate = false;
+            }
+            else {
+                input.style.backgroundColor = "red";
+                _this.username_is_duplicate = true;
+            }
+        });
+    };
+    EditProfileComponent.prototype.checkPassword = function (passwordinput, cpasswordinput) {
+        if (passwordinput.value == cpasswordinput.value) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    EditProfileComponent.prototype.passwordChanged = function () {
+        if (this.edit_profile_form.get('password').value != this.user.password) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
     EditProfileComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-edit-profile',
@@ -1816,7 +1936,8 @@ var EditProfileComponent = /** @class */ (function () {
             styles: [__webpack_require__(/*! ./edit-profile.component.css */ "./src/app/student-access-level/edit-profile/edit-profile.component.css")]
         }),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_auth_auth_service__WEBPACK_IMPORTED_MODULE_2__["AuthService"],
-            _user_service__WEBPACK_IMPORTED_MODULE_4__["UserService"]])
+            _user_service__WEBPACK_IMPORTED_MODULE_4__["UserService"],
+            _angular_router__WEBPACK_IMPORTED_MODULE_6__["Router"]])
     ], EditProfileComponent);
     return EditProfileComponent;
 }());
@@ -1864,6 +1985,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _user_service__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../user.service */ "./src/app/user.service.ts");
 /* harmony import */ var _case_service__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../case.service */ "./src/app/case.service.ts");
 /* harmony import */ var _auth_auth_service__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../auth/auth.service */ "./src/app/auth/auth.service.ts");
+/* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
+
 
 
 
@@ -1872,10 +1995,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var PostNewCaseComponent = /** @class */ (function () {
-    function PostNewCaseComponent(userService, authService, caseService) {
+    function PostNewCaseComponent(userService, authService, caseService, router) {
         this.userService = userService;
         this.authService = authService;
         this.caseService = caseService;
+        this.router = router;
         this.topics = [];
         this.responsible_users = [];
         this.post_new_case_form = new _angular_forms__WEBPACK_IMPORTED_MODULE_2__["FormGroup"]({
@@ -1903,6 +2027,7 @@ var PostNewCaseComponent = /** @class */ (function () {
         this.post_new_case();
     };
     PostNewCaseComponent.prototype.post_new_case = function () {
+        var _this = this;
         var topic_inserted = this.post_new_case_form.get('topic').value;
         var content_inserted = this.post_new_case_form.get('content').value;
         var responsible_user_inserted = this.post_new_case_form.get('responsible_user').value;
@@ -1917,10 +2042,12 @@ var PostNewCaseComponent = /** @class */ (function () {
             description: '',
             token: localStorage.getItem('token'),
         };
-        console.log(localStorage.getItem('token'));
-        console.log(new_case.token);
         this.caseService.addCase(new_case).subscribe(function (answer) {
             alert(answer.message);
+            if (answer.success) {
+                var redirect = "/student";
+                _this.router.navigateByUrl(redirect);
+            }
         });
     };
     PostNewCaseComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
@@ -1931,7 +2058,8 @@ var PostNewCaseComponent = /** @class */ (function () {
         }),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_user_service__WEBPACK_IMPORTED_MODULE_4__["UserService"],
             _auth_auth_service__WEBPACK_IMPORTED_MODULE_6__["AuthService"],
-            _case_service__WEBPACK_IMPORTED_MODULE_5__["CaseService"]])
+            _case_service__WEBPACK_IMPORTED_MODULE_5__["CaseService"],
+            _angular_router__WEBPACK_IMPORTED_MODULE_7__["Router"]])
     ], PostNewCaseComponent);
     return PostNewCaseComponent;
 }());
@@ -2241,6 +2369,12 @@ var UserService = /** @class */ (function () {
         var url = this.usersUrl + "/" + id;
         return this.http.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("getUser id=" + id)));
     };
+    UserService.prototype.getUserByUsername = function () {
+        var url = "http://localhost:8080/contacts/rest/users/getuserbyusername/" +
+            localStorage.getItem("username") + "/" +
+            localStorage.getItem("token");
+        return this.http.get(url).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("getuserbyusername")));
+    };
     UserService.prototype.getSomeUsesrs = function (key, value) {
         return this.http.get(this.usersUrl + "/?" + key + "=" + value).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('getUsers', [])));
     };
@@ -2249,7 +2383,8 @@ var UserService = /** @class */ (function () {
         var httpOptions = {
             headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({ 'Content-Type': 'application/json' })
         };
-        return this.http.put(this.usersUrl, user, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('updateUser')));
+        var url = "http://localhost:8080/contacts/rest/users/editprofile";
+        return this.http.put(url, user, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('editprofile')));
     };
     UserService.prototype.handleError = function (operation, result) {
         if (operation === void 0) { operation = 'operation'; }

@@ -19,7 +19,6 @@ public class AuthManager {
 	
 	@Inject
 	UserDao dao;
-	
 	@Transactional
 	public ActionResult<UserEntity> signup(UserEntity user, @Context HttpServletRequest request) {
 		TokenGenerator tg = new TokenGenerator();
@@ -46,8 +45,7 @@ public class AuthManager {
 		request.getSession().setAttribute("token", user.getToken());
 		request.getSession().setAttribute("token", user.getId());
 		return newUser;
-	}
-	
+	}	
 	public ActionResult<UserEntity> login(UserEntity user, @Context HttpServletRequest request){
 		TokenGenerator tg = new TokenGenerator();
 		ActionResult<UserEntity> newUser = new ActionResult<UserEntity>(); 
@@ -65,7 +63,6 @@ public class AuthManager {
 		}
 		return newUser;
 	}
-	
 	public ActionResult<Boolean> logout(UserEntity user, @Context HttpServletRequest request){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
 		if (request.getSession().getAttribute("token") == null){
@@ -86,7 +83,6 @@ public class AuthManager {
 		}
 		return answer;
 	}
-	
 	@Transactional
 	public ActionResult<Boolean> deleteUser(int id){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
@@ -101,7 +97,6 @@ public class AuthManager {
 		}
 		return answer;
 	}
-	
 	@Transactional
 	public ActionResult<Boolean> clearAllUsers(){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
@@ -117,7 +112,6 @@ public class AuthManager {
 		}
 		return answer;
 	}
-	
 	public ActionResult<Boolean> isNewUsername(String username){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
 		boolean isNew = dao.isNewUsername(username);
@@ -125,7 +119,6 @@ public class AuthManager {
 		answer.setSuccess(true);
 		return answer;
 	}
-
 	public String validateToken(String token, @Context HttpServletRequest request) {
 		if(token.equals(request.getSession().getAttribute("token"))){
 			return "true";
@@ -133,7 +126,5 @@ public class AuthManager {
 		else{
 			return "false";
 		}
-	}
-	
-	
+	}	
 }

@@ -1,0 +1,87 @@
+package ir.asta.training.contacts.manager;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Context;
+
+import org.springframework.transaction.annotation.Transactional;
+
+import ir.asta.training.contacts.dao.UserDao;
+import ir.asta.training.contacts.entities.UserEntity;
+import ir.asta.wise.core.datamanagement.ActionResult;
+import models.Roles;
+import utils.Settings;
+
+@Named("userManager")
+public class UserManager {
+	
+	@Inject
+	UserDao dao;
+	
+	public ActionResult<List<UserEntity>> getResponsibleUsers(String token, @Context HttpServletRequest request){
+		ActionResult<List<UserEntity>> answer = new ActionResult<List<UserEntity>>();
+		if(!request.getSession().getAttribute("token").equals(token)){
+			answer.setSuccess(false);
+			answer.setMessage("مشکل در session");
+			return answer;
+		}
+		List<UserEntity> responsibleUsers = dao.getResponsibleUsers();
+		if (responsibleUsers.size() == 0){
+			answer.setSuccess(false);
+			answer.setMessage("هیچ کاربر پاسخگویی یافت نشد!!");
+		}
+		else{
+			filterInformations(responsibleUsers);
+			answer.setSuccess(true);
+			answer.setData(responsibleUsers);
+		}
+		return answer;
+	}
+	@Transactional
+	public ActionResult<Boolean> addConfirmedUser(UserEntity user){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		if (user.getPassword().equals("qweasdzxc")){
+			if(dao.save(user)){
+				answer.setSuccess(true);
+				answer.setData(true);
+				answer.setMessage("با موفقیت ذخیره شد");
+			}
+			else{
+				answer.setSuccess(false);
+				answer.setSuccess(false);
+				answer.setMessage("خطا در هنگام ذخیره کردن کاربر");
+			}
+		}
+		else{
+			answer.setSuccess(false);
+			answer.setData(false);
+			answer.setMessage("رمز عبور اشتباه است");
+		}
+		return answer;
+	}
+	public ActionResult<List<UserEntity>> showMeAllUsers(String password){
+		ActionResult<List<UserEntity>> answer = new ActionResult<List<UserEntity>>();
+		if(!password.equals(Settings.password)){
+			answer.setSuccess(false);
+			answer.setMessage("رمز عبور اشتباه است");
+			return answer;
+		}
+		List<UserEntity> allUsers = dao.showMeAllUsers();
+		answer.setData(allUsers);
+		answer.setSuccess(true);
+		return answer;
+	}
+	
+	private void filterInformations(List<UserEntity> users){
+		for(UserEntity user : users){
+			user.setId(null);
+			user.setPassword(null);
+			user.setToken(null);
+		}
+	}
+	
+}

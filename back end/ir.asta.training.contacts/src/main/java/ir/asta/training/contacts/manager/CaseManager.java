@@ -16,6 +16,7 @@ import ir.asta.training.contacts.dao.UserDao;
 import ir.asta.training.contacts.entities.CaseEntity;
 import ir.asta.training.contacts.entities.UserEntity;
 import ir.asta.wise.core.datamanagement.ActionResult;
+import models.Roles;
 import models.Status;
 import utils.Settings;
 import org.json.JSONException;
@@ -49,6 +50,7 @@ public class CaseManager {
 		}
 		return answer;
 	}
+	
 	@Transactional
 	public CaseEntity caseEntityFactory(String newCaseString) throws JSONException, ParseException{
 		JSONObject newCaseObj = new JSONObject(new JSONTokener(newCaseString));
@@ -64,6 +66,7 @@ public class CaseManager {
 		newCase.setToken(newCaseObj.getString("token"));
 		return newCase;
 	}
+	
 	@Transactional
 	public ActionResult<Boolean> deleteCase(Long id) {
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
@@ -80,6 +83,7 @@ public class CaseManager {
 		}
 		return answer;
 	}
+	
 	@Transactional
 	public ActionResult<Integer> deleteAllCases(String password) {
 		ActionResult<Integer> answer = new ActionResult<Integer>();
@@ -92,6 +96,41 @@ public class CaseManager {
 		answer.setData(result);
 		answer.setSuccess(true);
 		answer.setMessage("با موفقیت انجام شد");
+		return answer;
+	}
+	
+	@Transactional
+	public ActionResult<List<CaseEntity>> getMyCases(String username){
+		ActionResult<List<CaseEntity>> answer = new ActionResult<List<CaseEntity>>();
+		List<CaseEntity> result = dao.getMyCases(username);
+		answer.setData(result);
+		answer.setSuccess(true);
+		return answer;
+	}
+	
+	public ActionResult<List<CaseEntity>> getMyCasesToFulfill(String username){
+		UserEntity user = userDao.getUserByUsername(username);
+		if (user.getRole()==Roles.MANAGER){username = "";}
+		ActionResult<List<CaseEntity>> answer = new ActionResult<List<CaseEntity>>();
+		List<CaseEntity> result = dao.getMyCasesToFulfill(username);
+		answer.setData(result);
+		answer.setSuccess(true);
+		return answer;
+	}
+
+	public ActionResult<Boolean> updateCase(CaseEntity acase){
+		ActionResult<Boolean> answer = new ActionResult<Boolean>();
+		UserEntity newUser = userDao.getUserByUsername(acase.getResponsible_user().getUsername());
+		acase.setResponsible_user(newUser);
+		if(dao.updateCase(acase)){
+			answer.setSuccess(true);
+			answer.setMessage("عملیات با موفقیت انجام شد");
+			answer.setData(true);
+		}else{
+			answer.setData(false);
+			answer.setMessage("خطار در هنگام به روز رسانی مورد");
+			answer.setSuccess(false);
+		}
 		return answer;
 	}
 }

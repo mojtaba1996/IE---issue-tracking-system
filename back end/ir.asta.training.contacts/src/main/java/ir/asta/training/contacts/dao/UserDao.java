@@ -25,7 +25,7 @@ public class UserDao {
 			return true;
 		}
 		return false;
-	}
+	}	
 	
 	public UserEntity exist(UserEntity user){
 		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username", UserEntity.class);
@@ -54,14 +54,13 @@ public class UserDao {
 		q.executeUpdate();
 	}
 	
-
 	public boolean isNewUsername(String username){
 		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username");
 		q.setParameter("username", username);
 		List<UserEntity> result = q.getResultList();
 		return result.size() == 0;
 	}
-
+	
 	public List<UserEntity> getResponsibleUsers(){
 		Roles roles = new Roles();
 		Query q = entityManager.createQuery("select u from UserEntity u where u.role <> :role and u.confirmed = True", UserEntity.class);
@@ -73,7 +72,10 @@ public class UserDao {
 	public UserEntity getUserByUsername(String username){
 		Query q = entityManager.createQuery("select u from UserEntity u where u.username = :username");
 		q.setParameter("username", username);
-		return (UserEntity) q.getResultList().get(0);
+		List<UserEntity> result = q.getResultList();
+		if (result.size()==1){ return result.get(0);}
+		else { return null; }
+		
 	}
 	
 	public List<UserEntity> showMeAllUsers(){
@@ -81,4 +83,14 @@ public class UserDao {
 		List<UserEntity> results = q.getResultList();
 		return results;
 	}
+	
+	public boolean updateUser(UserEntity user){
+		if(entityManager.contains(user)){
+			entityManager.merge(user);
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 }

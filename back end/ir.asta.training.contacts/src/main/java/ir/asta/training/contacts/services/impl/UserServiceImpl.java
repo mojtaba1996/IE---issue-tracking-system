@@ -1,24 +1,25 @@
 package ir.asta.training.contacts.services.impl;
 
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
-
 import ir.asta.training.contacts.entities.UserEntity;
 import ir.asta.training.contacts.manager.AuthManager;
 import ir.asta.training.contacts.manager.UserManager;
 import ir.asta.training.contacts.services.UserService;
 import ir.asta.wise.core.datamanagement.ActionResult;
+import utils.Settings;
 
 @Named("userService")
 public class UserServiceImpl implements UserService {
 	
 	@Context HttpServletRequest request;
 	@Context HttpServletResponse response;
+	
+	Settings settings = new Settings();
 	
 	@Inject
 	UserManager manager;
@@ -36,6 +37,31 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ActionResult<List<UserEntity>> showMeAllUsers(String password) {
 		return manager.showMeAllUsers(password);
+	}
+
+	@Override
+	public ActionResult<UserEntity> getUserByUsername(String username, String token) {
+		if(!token.equals(request.getSession().getAttribute("token"))){
+			ActionResult<UserEntity> answer = new ActionResult<UserEntity>();
+			answer.setSuccess(false);
+			answer.setMessage(settings.TOKEN_DOES_NOT_MATCH);
+			return answer;
+		}
+		else{
+			return manager.getUserByUsername(username);
+		}
+	}
+
+	@Override
+	public ActionResult<Boolean> editProfile(UserEntity user) {
+		if(!user.getToken().equals(request.getSession().getAttribute("token"))){
+			ActionResult<Boolean> answer = new ActionResult<Boolean>();
+			answer.setSuccess(false);
+			answer.setMessage(settings.TOKEN_DOES_NOT_MATCH);
+			return answer;
+		}else{
+			return manager.editUserProfile(user);
+		}
 	}
 
 }

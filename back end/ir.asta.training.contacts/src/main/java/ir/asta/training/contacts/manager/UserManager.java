@@ -1,5 +1,6 @@
 package ir.asta.training.contacts.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,7 +22,7 @@ public class UserManager {
 	
 	@Inject
 	UserDao dao;
-	
+	@Transactional
 	public ActionResult<List<UserEntity>> getResponsibleUsers(String token, @Context HttpServletRequest request){
 		ActionResult<List<UserEntity>> answer = new ActionResult<List<UserEntity>>();
 		if(!request.getSession().getAttribute("token").equals(token)){
@@ -35,7 +36,7 @@ public class UserManager {
 			answer.setMessage("هیچ کاربر پاسخگویی یافت نشد!!");
 		}
 		else{
-			filterInformations(responsibleUsers);
+			responsibleUsers = filterInformations(responsibleUsers);
 			answer.setSuccess(true);
 			answer.setData(responsibleUsers);
 		}
@@ -74,14 +75,49 @@ public class UserManager {
 		answer.setData(allUsers);
 		answer.setSuccess(true);
 		return answer;
-	}
-	
-	private void filterInformations(List<UserEntity> users){
-		for(UserEntity user : users){
-			user.setId(null);
-			user.setPassword(null);
-			user.setToken(null);
+	}	
+	public ActionResult<UserEntity> getUserByUsername(String username){
+		ActionResult<UserEntity> answer = new ActionResult<UserEntity>();
+		UserEntity result = dao.getUserByUsername(username);
+		if (result == null){
+			answer.setSuccess(false);
+			answer.setMessage("کاربر یافت نشد");
 		}
+		else{
+			answer.setSuccess(true);
+			answer.setData(result);
+		}
+		return answer;
+	}
+	@Transactional
+	public ActionResult<Boolean> editUserProfile(UserEntity user){
+		UserEntity oldUser = dao.getUserByUsername(user.getUsername());
+		ActionResult<Boolean> answer = new ActionResult<Boolean>(); 
+		oldUser.setFirstname(user.getFirstname());
+		oldUser.setLastname(user.getLastname());
+		oldUser.setPassword(user.getPassword());
+		if(dao.updateUser(oldUser)){
+			answer.setSuccess(true);
+			answer.setMessage("با موفقیت ویرایش شد");
+			answer.setData(true);
+		}else{
+			answer.setSuccess(false);
+			answer.setMessage("ویرایش نشد");
+		}
+		return answer;
+	}
+	private List<UserEntity> filterInformations(List<UserEntity> users){
+		List<UserEntity> retList = new ArrayList<UserEntity>();
+		for(UserEntity user : users){
+			UserEntity newUser = new UserEntity();
+			newUser.setConfirmed(user.isConfirmed());
+			newUser.setFirstname(user.getFirstname());
+			newUser.setLastname(user.getLastname());
+			newUser.setRole(user.getRole());
+			newUser.setUsername(user.getUsername());
+			retList.add(newUser);
+		}
+		return retList;
 	}
 	
 }

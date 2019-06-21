@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="models.Roles"/>
-<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.services.UserService"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.manager.UserManager"/>
 <fullyQualifiedTypeName name="javax.ws.rs.core.MediaType"/>
@@ -14,6 +12,10 @@
 <fullyQualifiedTypeName name="java.text.DateFormat"/>
 <fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
 <fullyQualifiedTypeName name="ir.asta.training.contacts.dao.UserDao"/>
-<fullyQualifiedTypeName name="models.Status"/>
+<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="utils.Settings"/>
+<fullyQualifiedTypeName name="javax.ws.rs.PUT"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="models.Roles"/>
+<fullyQualifiedTypeName name="models.Status"/>
 </qualifiedTypeNameHistroy>
