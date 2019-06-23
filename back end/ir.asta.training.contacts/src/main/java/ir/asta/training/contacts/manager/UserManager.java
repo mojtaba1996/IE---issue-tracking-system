@@ -96,6 +96,7 @@ public class UserManager {
 		oldUser.setFirstname(user.getFirstname());
 		oldUser.setLastname(user.getLastname());
 		oldUser.setPassword(user.getPassword());
+		oldUser.setConfirmed(user.isConfirmed());
 		if(dao.updateUser(oldUser)){
 			answer.setSuccess(true);
 			answer.setMessage("با موفقیت ویرایش شد");

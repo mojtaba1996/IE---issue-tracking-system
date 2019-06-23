@@ -4,6 +4,7 @@ package ir.asta.training.contacts.dao;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,6 +19,9 @@ public class UserDao {
 	
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Inject
+	CaseDao caseDao;
 	
 	public boolean save(UserEntity user) {
 		if (!entityManager.contains(user)){
@@ -39,11 +43,12 @@ public class UserDao {
 		}
 	}
 	
-	public boolean deleteUser(int id){
+	public boolean deleteUser(UserEntity user){
 		boolean answer = false;
-		UserEntity userToDelete = entityManager.find(UserEntity.class, new Long(id));
-		if (userToDelete != null){
-			entityManager.remove(userToDelete);
+		if (user != null){
+			System.out.println(user.getUsername());
+			caseDao.clearCases(user.getUsername());
+			entityManager.remove(user);
 			answer = true;
 		}
 		return answer;
@@ -75,7 +80,14 @@ public class UserDao {
 		List<UserEntity> result = q.getResultList();
 		if (result.size()==1){ return result.get(0);}
 		else { return null; }
-		
+	}
+	
+	public UserEntity getUserById(long id){
+		Query q = entityManager.createQuery("SELECT u FROM UserEntity u WHERE u.id = :id");
+		q.setParameter("id", id);
+		List<UserEntity> result = q.getResultList();
+		if (result.size()==1){ return result.get(0);}
+		else { return null; }
 	}
 	
 	public List<UserEntity> showMeAllUsers(){

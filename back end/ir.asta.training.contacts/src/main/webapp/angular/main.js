@@ -735,7 +735,7 @@ var SignupComponent = /** @class */ (function () {
             username: this.username.value,
             password: this.password.value,
             role: this.role.value || _models__WEBPACK_IMPORTED_MODULE_5__["Roles"].STUDENT,
-            confirmed: this.isConfirmed(this.signup_form.get("role").value || _models__WEBPACK_IMPORTED_MODULE_5__["Roles"].STUDENT),
+            confirmed: this.isConfirmed(this.role.value || _models__WEBPACK_IMPORTED_MODULE_5__["Roles"].STUDENT),
         };
         if (this.password.value != this.confirm_password.value) {
             return;
@@ -757,6 +757,7 @@ var SignupComponent = /** @class */ (function () {
         }
     };
     SignupComponent.prototype.isConfirmed = function (role) {
+        console.log(role);
         if (role == _models__WEBPACK_IMPORTED_MODULE_5__["Roles"].STUDENT) {
             return true;
         }
@@ -861,6 +862,7 @@ var CaseService = /** @class */ (function () {
     };
     /** PUT: update the case on the server */
     CaseService.prototype.updateCase = function (acase) {
+        acase.token = localStorage.getItem('token');
         var httpOptions = {
             headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({ 'Content-Type': 'application/json' })
         };
@@ -1061,7 +1063,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_user.username}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let responsibleUser of responsibleUsers\" value = \"{{responsibleUser.username}}\">\n              {{responsibleUser.firstname}} {{responsibleUser.lastname}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
+module.exports = "<div class=\"rc\">\n  <form [formGroup] = \"fulfill_form\">\n    <table class=\"white_text\">\n      <tr>\n        <th>\n          عنوان مورد\n        </th>\n        <th>\n          تاریخ ثبت\n        </th>\n        <th>\n          متن و توضیحات\n        </th>\n        <th>\n          مسئول پیگیری\n        </th>\n        <th>\n          وضعیت\n        </th>\n        <th>\n            توضیحات\n        </th>\n        <th>\n            ارجاع به\n        </th>\n      </tr>\n      <tr *ngFor = \"let acase of cases\" >\n        <td>\n          {{acase.topic}}\n        </td>\n        <td>\n            {{acase.date | date}}\n        </td>\n        <td>\n          {{acase.content}}\n        </td>\n        <td>\n          {{acase.responsible_user.username}}\n        </td>\n        <td>\n          {{acase.status}}\n        </td>\n        <td>\n          <textarea formControlName=\"description\" cols=\"30\" rows=\"4\" value = \"{{acase.description}}\">\n              {{acase.description}}\n          </textarea>\n        </td>\n        <td>\n          <select formControlName = \"refer_to\">\n            <option value=\"\">انتخاب کنید</option>\n            <option *ngFor = \"let responsibleUser of responsibleUsers\" value = \"{{responsibleUser.username}}\">\n              {{responsibleUser.firstname}} {{responsibleUser.lastname}}\n            </option>\n          </select>\n        </td>\n        <td>\n            <button (click) = \"refer(acase)\" >ارجاع</button>\n            <button (click) = \"close(acase)\">خاتمه</button>\n            <button (click) = \"postpone(acase)\" >تعویق</button>\n        </td>\n\n      </tr>\n    </table>\n  </form>\n</div>"
 
 /***/ }),
 
@@ -1115,7 +1117,6 @@ var FulfillComponent = /** @class */ (function () {
     };
     FulfillComponent.prototype.getCases = function () {
         var _this = this;
-        console.log(1111111111);
         this.caseService.getMyCasesToFulfill().subscribe(function (answer) {
             if (answer.success) {
                 _this.cases = answer.data;
@@ -1124,19 +1125,32 @@ var FulfillComponent = /** @class */ (function () {
     };
     FulfillComponent.prototype.refer = function (acase) {
         var _this = this;
-        console.log(this.fulfill_form.get('refer_to').value);
         var responsibleUser = {
             username: this.fulfill_form.get('refer_to').value,
         };
         acase.responsible_user = responsibleUser;
         acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].INQUEUE;
         acase.description = this.fulfill_form.get('description').value;
-        acase.token = localStorage.getItem('token');
-        this.caseService.updateCase(acase).subscribe(function () { return _this.getCases(); });
+        this.caseService.updateCase(acase).subscribe(function (answer) {
+            _this.getCases();
+        });
     };
     FulfillComponent.prototype.close = function (acase) {
+        var _this = this;
+        acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].CLOSED;
+        acase.description = this.fulfill_form.get('description').value;
+        this.caseService.updateCase(acase).subscribe(function (answer) {
+            _this.getCases();
+        });
     };
     FulfillComponent.prototype.postpone = function (acase) {
+        var _this = this;
+        acase.status = _models__WEBPACK_IMPORTED_MODULE_3__["Status"].POSTPONED;
+        acase.description = this.fulfill_form.get('description').value;
+        this.caseService.updateCase(acase).subscribe(function (answer) {
+            console.log(answer.message);
+            _this.getCases();
+        });
     };
     FulfillComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -1472,7 +1486,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div calss = \"rc\">\n    <table class=\"white_text\">\n      <tr>\n        <th>نام</th>\n        <th>نام خانوادگی</th>\n        <th>شماره کاربری</th>\n        <th>نقش</th>\n        <th>وضعیت تایید</th>\n      </tr>\n      <tr *ngFor = \"let user of users\">\n        <td>{{user.firstname}}</td>\n        <td>{{user.lastname}}</td>\n        <td>{{user.username}}</td>\n        <td>{{user.role}}</td>\n        <td>{{user.confirmed}}</td>\n        <td class=\"button\" (click) = \"reject(user)\" *ngIf = \"user.confirmed\">عدم تایید</td>\n        <td class=\"button\" (click) = \"confirm(user)\" *ngIf = \"!user.confirmed\">تایید</td>\n        <td class=\"button\" (click) = \"delete(user)\">حذف از سامانه</td>\n        <td class=\"button\" (click) = \"see_profile(user)\">مشاهده پروفایل</td>\n      </tr>\n    </table>\n  </div>"
+module.exports = "<div calss = \"rc\">\n    <table class=\"white_text\">\n      <tr>\n        <th>نام</th>\n        <th>نام خانوادگی</th>\n        <th>نام کاربری</th>\n        <th>نقش</th>\n        <th>وضعیت تایید</th>\n      </tr>\n      <tr *ngFor = \"let user of users\">\n        <td>{{user.firstname}}</td>\n        <td>{{user.lastname}}</td>\n        <td>{{user.username}}</td>\n        <td>{{user.role}}</td>\n        <td>{{user.confirmed}}</td>\n        <td class=\"button\" (click) = \"reject(user)\" *ngIf = \"user.confirmed\">عدم تایید</td>\n        <td class=\"button\" (click) = \"confirm(user)\" *ngIf = \"!user.confirmed\">تایید</td>\n        <td class=\"button\" (click) = \"delete(user)\">حذف از سامانه</td>\n        <td class=\"button\" (click) = \"see_profile(user)\">مشاهده پروفایل</td>\n      </tr>\n    </table>\n  </div>"
 
 /***/ }),
 
@@ -1488,11 +1502,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UsersManagementComponent", function() { return UsersManagementComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _user_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../user.service */ "./src/app/user.service.ts");
+/* harmony import */ var _models__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../models */ "./src/app/models.ts");
+/* harmony import */ var _user_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../user.service */ "./src/app/user.service.ts");
+
 
 
 
 var UsersManagementComponent = /** @class */ (function () {
+    //notConfirmedUsers : User[];
+    //confirmedUsers : User[];
     function UsersManagementComponent(userService) {
         this.userService = userService;
     }
@@ -1512,7 +1530,12 @@ var UsersManagementComponent = /** @class */ (function () {
     */
     UsersManagementComponent.prototype.getUsers = function () {
         var _this = this;
-        this.userService.getUsesrs().subscribe(function (users) { return _this.users = users; });
+        this.userService.getUsesrs().subscribe(function (answer) {
+            console.log("user management, get users:    " + answer.message);
+            if (answer.success) {
+                _this.users = answer.data;
+            }
+        });
         /*
         this.getConfirmedUsers();
         this.getnotConfirmedUsers();
@@ -1520,17 +1543,40 @@ var UsersManagementComponent = /** @class */ (function () {
     };
     UsersManagementComponent.prototype.confirm = function (user) {
         var _this = this;
+        if (user.role == _models__WEBPACK_IMPORTED_MODULE_2__["Roles"].MANAGER) {
+            return;
+        }
         user.confirmed = true;
         this.userService.updateUser(user).subscribe(function () { return _this.getUsers(); });
     };
     UsersManagementComponent.prototype.reject = function (user) {
         var _this = this;
+        if (user.role == _models__WEBPACK_IMPORTED_MODULE_2__["Roles"].MANAGER) {
+            return;
+        }
         user.confirmed = false;
         this.userService.updateUser(user).subscribe(function () { return _this.getUsers(); });
     };
     UsersManagementComponent.prototype.delete = function (user) {
+        var _this = this;
+        this.userService.deleteUser(user).subscribe(function (answer) {
+            if (!answer.success) {
+                console.log(answer.message);
+            }
+            else {
+                _this.getUsers();
+            }
+        });
     };
     UsersManagementComponent.prototype.see_profile = function (user) {
+    };
+    UsersManagementComponent.prototype.ismanager = function (user) {
+        if (user.role == _models__WEBPACK_IMPORTED_MODULE_2__["Roles"].MANAGER) {
+            return true;
+        }
+        else {
+            return false;
+        }
     };
     UsersManagementComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -1538,7 +1584,7 @@ var UsersManagementComponent = /** @class */ (function () {
             template: __webpack_require__(/*! ./users-management.component.html */ "./src/app/manager-access-level/users-management/users-management.component.html"),
             styles: [__webpack_require__(/*! ./users-management.component.css */ "./src/app/manager-access-level/users-management/users-management.component.css")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_user_service__WEBPACK_IMPORTED_MODULE_2__["UserService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_user_service__WEBPACK_IMPORTED_MODULE_3__["UserService"]])
     ], UsersManagementComponent);
     return UsersManagementComponent;
 }());
@@ -2361,8 +2407,15 @@ var UserService = /** @class */ (function () {
     };
     /** GET heroes from the server */
     UserService.prototype.getUsesrs = function () {
-        return this.http.get(this.usersUrl)
-            .pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('getUsers', [])));
+        var httpOptions = {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({
+                'Content-Type': 'application/json',
+            })
+        };
+        var url = "http://localhost:8080/contacts/rest/users/showmeallusers/" +
+            localStorage.getItem('token') + "/" +
+            "password";
+        return this.http.get(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("showmeallusers")));
     };
     /** GET hero by id. Will 404 if id not found */
     UserService.prototype.getUser = function (id) {
@@ -2383,8 +2436,20 @@ var UserService = /** @class */ (function () {
         var httpOptions = {
             headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({ 'Content-Type': 'application/json' })
         };
+        user.token = localStorage.getItem('token');
         var url = "http://localhost:8080/contacts/rest/users/editprofile";
         return this.http.put(url, user, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError('editprofile')));
+    };
+    UserService.prototype.deleteUser = function (user) {
+        var httpOptions = {
+            headers: new _angular_common_http__WEBPACK_IMPORTED_MODULE_2__["HttpHeaders"]({
+                'Content-Type': 'application/json',
+            })
+        };
+        var url = "http://localhost:8080/contacts/rest/auth/user/" +
+            user.username + "/" +
+            localStorage.getItem('token');
+        return this.http.delete(url, httpOptions).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_4__["catchError"])(this.handleError("showmeallusers")));
     };
     UserService.prototype.handleError = function (operation, result) {
         if (operation === void 0) { operation = 'operation'; }

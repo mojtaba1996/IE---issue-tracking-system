@@ -57,12 +57,39 @@ public class CaseDao {
 		return cases;
 	}
 	
+	public List<CaseEntity> getAllCases(){
+		Query q = entityManager.createQuery("SELECT c from CaseEntity c");
+		List<CaseEntity> result = q.getResultList();
+		return result;
+	}
+	
 	public boolean updateCase(CaseEntity acase){
-		if(entityManager.contains(acase)){
+		System.out.println(acase);
+		System.out.println(acase.getId());
+		if(entityManager.contains(acase)||true){
 			entityManager.merge(acase);
 			return true;
 		}else{
 			return false;
 		}
+	}
+	
+	public int clearCases(String username){
+		int count = 0;
+		Query q = entityManager.createQuery("SELECT c from CaseEntity c WHERE c.poster_user.username = :username ");
+		q.setParameter("username", username);
+		List<CaseEntity> cases = q.getResultList();
+		count += cases.size();
+		for(CaseEntity acase : cases){
+			entityManager.remove(acase);
+		}
+		q = entityManager.createQuery("SELECT c from CaseEntity c WHERE c.responsible_user.username = :username ");
+		q.setParameter("username", username);
+		cases = q.getResultList();
+		count += cases.size();
+		for(CaseEntity acase : cases){
+			entityManager.remove(acase);
+		}
+		return count;
 	}
 }

@@ -53,4 +53,9 @@ public interface CaseService {
 	@Path("/updateacase")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ActionResult<Boolean> updateACase(CaseEntity acase);
+	
+	@GET
+	@Path("/getallcases/{password}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ActionResult<List<CaseEntity>> getAllCases(@PathParam("password") String password);
 }

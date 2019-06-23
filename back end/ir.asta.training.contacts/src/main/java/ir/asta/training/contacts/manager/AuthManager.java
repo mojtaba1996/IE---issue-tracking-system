@@ -33,7 +33,7 @@ public class AuthManager {
 			newUser.setMessage("رمز عبور کوتاه است");
 			return newUser;
 		}
-		if(user.getRole() != Roles.STUDENT){
+		if(!user.getRole().equals(Roles.STUDENT)){
 			user.setConfirmed(false);
 		}
 		user.setToken(tg.generateToken(user.getUsername()));
@@ -43,7 +43,7 @@ public class AuthManager {
 			newUser.setSuccess(true);
 		}
 		request.getSession().setAttribute("token", user.getToken());
-		request.getSession().setAttribute("token", user.getId());
+		request.getSession().setAttribute("user_id", user.getId());
 		return newUser;
 	}	
 	public ActionResult<UserEntity> login(UserEntity user, @Context HttpServletRequest request){
@@ -84,9 +84,10 @@ public class AuthManager {
 		return answer;
 	}
 	@Transactional
-	public ActionResult<Boolean> deleteUser(int id){
+	public ActionResult<Boolean> deleteUser(String username){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
-		if (dao.deleteUser(id)){
+		UserEntity user = dao.getUserByUsername(username);
+		if (dao.deleteUser(user)){
 			answer.setData(true);
 			answer.setSuccess(true);
 			answer.setMessage("کاربر با موفقیت حذف شد");

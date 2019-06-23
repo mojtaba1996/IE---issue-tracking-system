@@ -31,9 +31,9 @@ public interface UserService {
 	public ActionResult<Boolean> addConfirmedUser(UserEntity user);
 	
 	@GET
-	@Path("/showmeallusers/{password}")
+	@Path("/showmeallusers/{token}/{password}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ActionResult<List<UserEntity>> showMeAllUsers(@PathParam("password") String password);
+	public ActionResult<List<UserEntity>> showMeAllUsers(@PathParam("token") String token, @PathParam("password") String password);
 	
 	@GET
 	@Path("/getuserbyusername/{username}/{token}")

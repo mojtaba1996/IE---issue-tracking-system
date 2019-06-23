@@ -11,11 +11,12 @@
 <fullyQualifiedTypeName name="java.util.Date"/>
 <fullyQualifiedTypeName name="java.text.DateFormat"/>
 <fullyQualifiedTypeName name="java.text.SimpleDateFormat"/>
-<fullyQualifiedTypeName name="ir.asta.training.contacts.dao.UserDao"/>
 <fullyQualifiedTypeName name="java.util.List"/>
-<fullyQualifiedTypeName name="utils.Settings"/>
+<fullyQualifiedTypeName name="models.Status"/>
 <fullyQualifiedTypeName name="javax.ws.rs.PUT"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="utils.Settings"/>
+<fullyQualifiedTypeName name="ir.asta.training.contacts.dao.UserDao"/>
 <fullyQualifiedTypeName name="models.Roles"/>
-<fullyQualifiedTypeName name="models.Status"/>
+<fullyQualifiedTypeName name="javax.inject.Inject"/>
 </qualifiedTypeNameHistroy>

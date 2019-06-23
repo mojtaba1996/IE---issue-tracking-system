@@ -3,6 +3,7 @@ package ir.asta.training.contacts.manager;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
@@ -103,6 +104,7 @@ public class CaseManager {
 	public ActionResult<List<CaseEntity>> getMyCases(String username){
 		ActionResult<List<CaseEntity>> answer = new ActionResult<List<CaseEntity>>();
 		List<CaseEntity> result = dao.getMyCases(username);
+		result = filterCases(result);
 		answer.setData(result);
 		answer.setSuccess(true);
 		return answer;
@@ -113,11 +115,13 @@ public class CaseManager {
 		if (user.getRole()==Roles.MANAGER){username = "";}
 		ActionResult<List<CaseEntity>> answer = new ActionResult<List<CaseEntity>>();
 		List<CaseEntity> result = dao.getMyCasesToFulfill(username);
+		result = filterCases(result);
 		answer.setData(result);
 		answer.setSuccess(true);
 		return answer;
 	}
 
+	@Transactional
 	public ActionResult<Boolean> updateCase(CaseEntity acase){
 		ActionResult<Boolean> answer = new ActionResult<Boolean>();
 		UserEntity newUser = userDao.getUserByUsername(acase.getResponsible_user().getUsername());
@@ -132,5 +136,41 @@ public class CaseManager {
 			answer.setSuccess(false);
 		}
 		return answer;
+	}
+
+	public ActionResult<List<CaseEntity>> getAllCases(){
+		ActionResult<List<CaseEntity>> answer = new ActionResult<List<CaseEntity>>();
+		List<CaseEntity> result = dao.getAllCases();
+		answer.setData(result);
+		answer.setSuccess(true);
+		return answer;
+	}
+	
+	public List<CaseEntity> filterCases(List<CaseEntity> cases){
+		List<CaseEntity> newCases = new ArrayList<CaseEntity>();
+		for(CaseEntity acase : cases){
+			UserEntity responsibleUser = new UserEntity();
+			responsibleUser.setConfirmed(acase.getResponsible_user().isConfirmed());
+			responsibleUser.setFirstname(acase.getResponsible_user().getFirstname());
+			responsibleUser.setLastname(acase.getResponsible_user().getLastname());
+			responsibleUser.setRole(acase.getResponsible_user().getRole());
+			responsibleUser.setUsername(acase.getResponsible_user().getUsername());
+			UserEntity posterUser = new UserEntity();
+			posterUser.setConfirmed(acase.getPoster_user().isConfirmed());
+			posterUser.setFirstname(acase.getPoster_user().getFirstname());
+			posterUser.setLastname(acase.getPoster_user().getLastname());
+			posterUser.setRole(acase.getPoster_user().getRole());
+			posterUser.setUsername(acase.getPoster_user().getUsername());
+			CaseEntity newCase = new CaseEntity();
+			newCase.setContent(acase.getContent());
+			newCase.setDate(acase.getDate());
+			newCase.setDescription(acase.getDescription());
+			newCase.setStatus(acase.getStatus());
+			newCase.setTopic(acase.getTopic());
+			newCase.setResponsible_user(responsibleUser);
+			newCase.setPoster_user(posterUser);
+			newCases.add(newCase);
+		}
+		return newCases;
 	}
 }

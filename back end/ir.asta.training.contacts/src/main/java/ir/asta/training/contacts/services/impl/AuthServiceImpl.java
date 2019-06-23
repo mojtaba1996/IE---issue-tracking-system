@@ -10,13 +10,15 @@ import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-
+import ir.asta.training.contacts.dao.UserDao;
 import ir.asta.training.contacts.entities.ContactEntity;
 import ir.asta.training.contacts.entities.UserEntity;
 import ir.asta.training.contacts.manager.AuthManager;
 import ir.asta.training.contacts.manager.ContactManager;
 import ir.asta.training.contacts.services.AuthService;
 import ir.asta.wise.core.datamanagement.ActionResult;
+import utils.Settings;
+import models.Roles;
 
 @Named("authService")
 public class AuthServiceImpl implements AuthService {
@@ -24,8 +26,14 @@ public class AuthServiceImpl implements AuthService {
 	@Context HttpServletRequest request;
 	@Context HttpServletResponse response;
 	
+	Settings settings = new Settings();
+	Roles roles = new Roles();
+	
 	@Inject
 	AuthManager manager;
+	
+	@Inject
+	UserDao userDao;
 	
 	@Override
 	public ActionResult<UserEntity> signup(UserEntity user) {
@@ -38,8 +46,21 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public ActionResult<Boolean> deleteUser(int id){ 		
-		return manager.deleteUser(id);
+	public ActionResult<Boolean> deleteUser(String username, String token){
+		if(!token.equals(request.getSession().getAttribute("token"))){
+			ActionResult<Boolean> answer = new ActionResult<Boolean>();
+			answer.setSuccess(false);
+			answer.setMessage(settings.TOKEN_DOES_NOT_MATCH);
+			return answer;
+		}
+		UserEntity user = userDao.getUserById((Long) request.getSession().getAttribute("user_id"));
+		if(!user.getRole().equals(roles.MANAGER)){
+			ActionResult<Boolean> answer = new ActionResult<Boolean>();
+			answer.setSuccess(false);
+			answer.setMessage(settings.ACCESS_DENIED);
+			return answer;
+		}
+		return manager.deleteUser(username);
 	}
 
 	@Override

@@ -38,9 +38,9 @@ public interface AuthService {
 	public ActionResult<Boolean> logout(UserEntity user);
 	
 	@DELETE
-	@Path("/user/{id}")
+	@Path("/user/{username}/{token}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ActionResult<Boolean> deleteUser(@PathParam("id") int id);
+	public ActionResult<Boolean> deleteUser(@PathParam("username") String username, @PathParam("token") String token);
 	
 	@DELETE
 	@Path("/users")
