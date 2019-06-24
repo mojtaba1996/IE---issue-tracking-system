@@ -1,0 +1,6 @@
+/config/
+/config.properties
+/ir/
+/logback.xml
+/models/
+/utils/

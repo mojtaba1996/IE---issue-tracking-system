@@ -28,10 +28,12 @@ public class CaseDao {
 	}
 	
 	public Boolean deleteCaseById(Long id){
-		Query q = entityManager.createQuery("DELETE CaseEntity c where c.id = :id");
-		q.setParameter("id", id);
-		int count = q.executeUpdate();
-		return count == 1;
+		CaseEntity caseToDelete = entityManager.find(CaseEntity.class, id);
+		entityManager.remove(caseToDelete);
+		//Query q = entityManager.createQuery("DELETE CaseEntity c where c.id = :id");
+		//q.setParameter("id", id);
+		//int count = q.executeUpdate();
+		return true;
 	}
 	
 	public int deleteAllCases(){
@@ -64,8 +66,6 @@ public class CaseDao {
 	}
 	
 	public boolean updateCase(CaseEntity acase){
-		System.out.println(acase);
-		System.out.println(acase.getId());
 		if(entityManager.contains(acase)||true){
 			entityManager.merge(acase);
 			return true;

@@ -1,0 +1,135 @@
+package ir.asta.training.contacts.entities;
+
+import java.util.Date;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name="WISE_CASE")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+public class CaseEntity {
+	
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	Long id;
+	
+	@ManyToOne(cascade={CascadeType.MERGE})
+	@JoinColumn(name = "poster_user")
+	@JsonBackReference
+	UserEntity poster_user;
+	
+	@ManyToOne(cascade={CascadeType.MERGE})
+	@JoinColumn(name = "responsible_user")
+	@JsonBackReference
+	UserEntity responsible_user;
+	
+	@Basic
+	@Column(name = "date")
+	Date date;
+	
+	@Basic
+	@Column(name = "topic")
+	String topic;
+	
+	@Basic
+	@Column(name = "content")
+	String content;
+	
+	@Basic
+	@Column(name = "status")
+	String status;
+	
+	@Basic
+	@Column(name = "description")
+	String description;
+	
+	@Basic
+	@Column(name = "token")
+	String token;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public UserEntity getPoster_user() {
+		return poster_user;
+	}
+
+	public void setPoster_user(UserEntity poster_user) {
+		this.poster_user = poster_user;
+	}
+
+	public UserEntity getResponsible_user() {
+		return responsible_user;
+	}
+
+	public void setResponsible_user(UserEntity responsible_user) {
+		this.responsible_user = responsible_user;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	public String getTopic() {
+		return topic;
+	}
+
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+}

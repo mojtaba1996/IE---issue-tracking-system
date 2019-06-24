@@ -76,7 +76,7 @@ module.exports = "body{\r\n    background-color: bisque;\r\n}\r\nh1{\r\n    text
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"rc\">\n    <h2 class=\"white_text\">سامانه رسیدگی به انتقادات، پیشنهادات و شکایت‌ها</h2>\n    <div [ngClass]=\"authService.role\" id = \"menu_div\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\" status = 'close'>\n        <div class = \"three_lines\" (click) = \"change_menu()\">\n            <div></div>\n            <div></div>\n            <div></div>\n        </div>\n        <br>\n        <div id = 'profile'>\n            <a routerLink = '/student/edit-profile'>\n                <img src=\"profile.png\" alt=\"پروفایل\">\n            </a>\n        </div>\n        <nav class=\"menu\" status = 'close'>\n            <a routerLink=\"/manager\" routerLinkActive=\"active\" *ngIf = \"mayI('مدیر')\">بخش مدیریت</a>\n            <a routerLink=\"/teacher\" routerLinkActive=\"active\" *ngIf = \"mayI('استاد')\">بخش اساتید</a>\n            <a routerLink=\"/employee\" routerLinkActive=\"active\" *ngIf = \"mayI('کارمند')\">بخش کارمندان</a>\n            <a routerLink=\"/student\" routerLinkActive=\"active\" *ngIf = \"mayI('دانشجو')\">بخش دانشجویی</a>\n        </nav>\n        <button (click)=\"logout()\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\">خروج</button>\n    </div>\n    <div class=\"rc\" id = \"dashboard_div\">\n        <router-outlet></router-outlet>\n    </div>\n    \n</div>"
+module.exports = "<div class=\"rc\">\n    <h2 class=\"white_text\">سامانه رسیدگی به انتقادات، پیشنهادات و شکایت‌ها</h2>\n    <div [ngClass]=\"authService.role\" id = \"menu_div\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\" status = 'close'>\n        <div class = \"three_lines\" (click) = \"change_menu()\">\n            <div></div>\n            <div></div>\n            <div></div>\n        </div>\n        <br>\n        <div id = 'profile'>\n            <a routerLink = '/student/edit-profile'>\n                <img src=\"assets/profile.png\" alt=\"پروفایل\">\n            </a>\n        </div>\n        <nav class=\"menu\" status = 'close'>\n            <a routerLink=\"/manager\" routerLinkActive=\"active\" *ngIf = \"mayI('مدیر')\">بخش مدیریت</a>\n            <a routerLink=\"/teacher\" routerLinkActive=\"active\" *ngIf = \"mayI('استاد')\">بخش اساتید</a>\n            <a routerLink=\"/employee\" routerLinkActive=\"active\" *ngIf = \"mayI('کارمند')\">بخش کارمندان</a>\n            <a routerLink=\"/student\" routerLinkActive=\"active\" *ngIf = \"mayI('دانشجو')\">بخش دانشجویی</a>\n        </nav>\n        <button (click)=\"logout()\" *ngIf = \"authService.readLocalStorageValue('isLoggedIn') == 'true'\">خروج</button>\n    </div>\n    <div class=\"rc\" id = \"dashboard_div\">\n        <router-outlet></router-outlet>\n    </div>\n</div>"
 
 /***/ }),
 
@@ -106,6 +106,10 @@ var AppComponent = /** @class */ (function () {
         this.router = router;
         this.title = 'issue-tracking-system';
     }
+    AppComponent.prototype.ngOnInit = function () {
+        var a = document.getElementById("sala");
+        a.currentTime = 60;
+    };
     AppComponent.prototype.logout = function () {
         var _this = this;
         this.authService.logout().subscribe(function (answer) {
@@ -2534,7 +2538,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\mojtaba\Dropbox\term 10\internet engineering\issue-tracking-system\front end\src\main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! E:\daneshgah\term 10\internet engineering\issue-tracking-system\front end\src\main.ts */"./src/main.ts");
 
 
 /***/ })
